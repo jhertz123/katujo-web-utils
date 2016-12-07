@@ -5,19 +5,34 @@
   	<groupId>com.katujo</groupId>
   	<artifactId>katujo-web-utils</artifactId>
   	<packaging>jar</packaging>
-  	<version>1.0-SNAPSHOT</version>
+  	<version>1.0.0</version>
   	<name>katujo-web-utils</name>
-  	<url>http://maven.apache.org</url>
+  	<description>Util classes for a Java web server that communicates with the clients using JSON..</description>
+  	<url>https://github.com/jhertz123/katujo-web-utils</url>
+
+  	<!-- License -->
+  	<licenses>
+    	<license>
+      	<name>MIT License</name>
+      	<url>https://raw.githubusercontent.com/jhertz123/katujo-web-utils/master/LICENSE</url>
+      	<distribution>repo</distribution>
+    	</license>
+  	</licenses>  
+  	
+  	<!-- Source Code -->
+  	<scm>
+	    <url>https://github.com/jhertz123/katujo-web-utils</url>
+  	</scm>  		
 
 	<!-- Properties -->
 	<properties>
 		<junit.version>4.11</junit.version>			
 	</properties>      
   
-  <!-- Dependencies  -->
-  <dependencies>
+  	<!-- Dependencies  -->
+  	<dependencies>
     
-  		<!--  JUNIT Testing -->
+		<!--  JUNIT Testing -->
     	<dependency>
       		<groupId>junit</groupId>
       		<artifactId>junit</artifactId>
@@ -60,7 +75,7 @@
 	<build>
 	
 		<!-- The name of the JAR file -->
-   		<finalName>katuo-web-utils</finalName>   
+   		<finalName>${artifactId}-${version}</finalName>   
    
    		<!-- Plugins -->
 		<plugins>
