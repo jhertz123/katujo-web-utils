@@ -1,2 +1,2 @@
 # katujo-web-utils
-Util classes for a Java web server that communicates with the client using JSON. 
+Util classes for a Java web server that communicates with the clients using JSON. 
