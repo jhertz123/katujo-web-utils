@@ -23,7 +23,7 @@ import com.google.gson.JsonObject;
  * @author Johan Hertz
  *
  */
-public class Database
+public class DatabaseManager
 {	
 	//This map holds the data sources
 	private final static Map<String, DataSource> dataSources = new ConcurrentHashMap<String, DataSource>();
@@ -35,7 +35,7 @@ public class Database
 	 * Create the object <b>without</b> a default data source look up set.
 	 *
 	 */
-	public Database() 
+	public DatabaseManager() 
 	{
 		this.defaultLookup = null;
 	}
@@ -44,7 +44,7 @@ public class Database
 	 * Create the object with the default data source look up set.
 	 * @param defaultDataSource
 	 */
-	public Database(String defaultDataSource)
+	public DatabaseManager(String defaultDataSource)
 	{
 		this.defaultLookup = defaultDataSource;
 	}
