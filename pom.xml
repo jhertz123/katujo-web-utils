@@ -1,13 +1,15 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   	
-	<!-- Name and Version -->  		
+	<!-- Version -->  		
   	<modelVersion>4.0.0</modelVersion>
   	<groupId>com.katujo</groupId>
   	<artifactId>katujo-web-utils</artifactId>
   	<packaging>jar</packaging>
   	<version>1.0.0</version>
+  	
+  	<!-- Name and Description -->
   	<name>katujo-web-utils</name>
-  	<description>Util classes for a Java web server that communicates with the clients using JSON..</description>
+  	<description>Util classes for a Java web application with a SQL database back end that communicates with clients using JSON.</description>
   	<url>https://github.com/jhertz123/katujo-web-utils</url>
 
   	<!-- License -->
@@ -22,7 +24,17 @@
   	<!-- Source Code -->
   	<scm>
 	    <url>https://github.com/jhertz123/katujo-web-utils</url>
-  	</scm>  		
+  	</scm>  
+  	
+  	<!-- Developers -->
+ 	<developers>
+    	<developer>
+      		<name>Johan Hertz</name>
+      		<email>johan.hertz@katujo.com</email>
+      		<organization>Katujo</organization>
+      		<organizationUrl>http://www.katujo.com</organizationUrl>
+    	</developer>
+  	</developers>  			
 
 	<!-- Properties -->
 	<properties>
