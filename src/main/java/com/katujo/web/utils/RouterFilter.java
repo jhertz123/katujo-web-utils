@@ -50,16 +50,16 @@ public class RouterFilter implements Filter
 	//The JSON content type
 	private static final String JSON_CONTENT_TYPE = "application/json";
 	
-	//The character encoding to use when send back JSON data
+	//The character encoding to use when sending back JSON data
 	private static final String JSON_CHARACTER_ENCODING = "ISO-8859-1";
 	
 	//The binary array content type
 	private static final String BINARY_CONTENT_TYPE = "application/octet-stream"; 
 	
-	//The thread local field to hold the HTTP Request data
+	//The thread local field to hold the HTTP request data
 	private static ThreadLocal<HttpServletRequest> request = new ThreadLocal<>();
 	
-	//The thread local field to hold the HTTP Request data
+	//The thread local field to hold the HTTP response data
 	private static ThreadLocal<HttpServletResponse> response = new ThreadLocal<>();	
 			
 	/*
@@ -139,8 +139,9 @@ public class RouterFilter implements Filter
 					}	
 					
 					//If the parameter length is 2 only allow HttpServletRequest and HttpServletResponse
-					else if(method.getParameterTypes().length == 2)
-						if(method.getParameterTypes()[0] == HttpServletRequest.class && method.getParameterTypes()[1] == HttpServletResponse.class)
+					else if(method.getParameterTypes().length == 2 &&
+							method.getParameterTypes()[0] == HttpServletRequest.class && 
+							method.getParameterTypes()[1] == HttpServletResponse.class)
 							type = Route.REQUEST_RESPONSE;
 					
 					//Ignore any other method that has parameter
