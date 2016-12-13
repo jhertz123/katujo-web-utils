@@ -91,6 +91,9 @@ public class RouterFilter implements Filter
 			//Get the extension that will be added to the end of every path 
 			String extension = config.getInitParameter("extension");
 			
+			//Get the print paths flag
+			boolean printPaths = "true".equals(config.getInitParameter("print-paths"));
+			
 			//Create the route objects
 			for(String clazz : classes)
 			{
@@ -172,7 +175,8 @@ public class RouterFilter implements Filter
 			
 			//Print the list
 			for(String item : list)
-				System.out.println(item);
+				if(printPaths)
+					System.out.println(item);
 		}
 		
 		//Failed
