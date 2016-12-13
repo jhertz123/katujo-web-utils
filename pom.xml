@@ -5,13 +5,13 @@
   	<groupId>com.katujo</groupId>
   	<artifactId>katujo-web-utils</artifactId>
   	<packaging>jar</packaging>
-  	<version>1.0.0</version>
+  	<version>0.0.1</version>
   	
   	<!-- Name and Description -->
   	<name>katujo-web-utils</name>
   	<description>Util classes for a Java web application with a SQL database back end that communicates with clients using JSON.</description>
   	<url>https://github.com/jhertz123/katujo-web-utils</url>
-
+  	
   	<!-- License -->
   	<licenses>
     	<license>
@@ -38,9 +38,22 @@
 
 	<!-- Properties -->
 	<properties>
-		<junit.version>4.11</junit.version>			
-	</properties>      
-  
+		<junit.version>4.11</junit.version>		
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>	
+	</properties>
+	
+	<!-- Distribution (for Maven Central)  -->
+	<distributionManagement>
+  		<snapshotRepository>
+    		<id>ossrh</id>
+    		<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+  		</snapshotRepository>
+  		<repository>
+    		<id>ossrh</id>
+    		<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+  		</repository>
+	</distributionManagement>	   
+		     
   	<!-- Dependencies  -->
   	<dependencies>
     
@@ -88,10 +101,53 @@
 	<build>
 	
 		<!-- The name of the JAR file -->
-   		<finalName>${artifactId}-${version}</finalName>   
+   		<finalName>${project.artifactId}-${project.version}</finalName>   
    
    		<!-- Plugins -->
 		<plugins>
+		
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<version>2.2.1</version>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<goals>
+							<goal>jar-no-fork</goal>
+						</goals>
+					</execution>
+					</executions>
+			</plugin>	
+			
+    		<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>2.9.1</version>
+				<executions>
+					<execution>
+						<id>attach-javadocs</id>
+						<goals>
+            				<goal>jar</goal>
+          				</goals>
+        			</execution>
+      			</executions>
+			</plugin>	
+			
+    		<plugin>
+      			<groupId>org.apache.maven.plugins</groupId>
+      			<artifactId>maven-gpg-plugin</artifactId>
+      			<version>1.5</version>
+      			<executions>
+        			<execution>
+          				<id>sign-artifacts</id>
+          				<phase>verify</phase>
+          				<goals>
+            				<goal>sign</goal>
+          				</goals>
+        			</execution>
+      			</executions>
+    		</plugin>						
 
 			<!-- Java Version -->
 			<plugin>
