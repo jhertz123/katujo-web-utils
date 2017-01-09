@@ -19,7 +19,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 /**
- * Helps in database communication. 
+ * Helps with database communication. 
  * @author Johan Hertz
  *
  */
