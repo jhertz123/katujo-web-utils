@@ -156,7 +156,7 @@ public class DatabaseManager
 	/**
 	 * Load a JSON object from the database using the SQL and the parameter.
 	 * <p>
-	 * If no result matched the query null will be returned.
+	 * If no result matched the query, null will be returned.
 	 * </p>
 	 * @param sql
 	 * @param parameter
