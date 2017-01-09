@@ -301,6 +301,17 @@ public class DatabaseManager
 	}
 	
 	/**
+	 * Execute the SQL with the parameter.
+	 * @param sql
+	 * @param parameter
+	 * @throws Exception
+	 */
+	protected void execute(String sql, Object parameter) throws Exception
+	{
+		this.execute(sql, new Object[]{parameter});
+	}
+	
+	/**
 	 * Execute the SQL with the parameters.
 	 * @param sql
 	 * @param parameters
