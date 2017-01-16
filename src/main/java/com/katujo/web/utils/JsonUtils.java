@@ -4,9 +4,11 @@ package com.katujo.web.utils;
 
 //Java imports
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.util.concurrent.ConcurrentHashMap;
+
 
 //Google imports
 import com.google.gson.JsonArray;
@@ -167,7 +169,7 @@ public class JsonUtils
 				else if(Double.class.getName().equals(type)) obj.addProperty(field, result.getDouble(i+1));
 				else if(BigDecimal.class.getName().equals(type)) obj.addProperty(field, result.getDouble(i+1));
 				else if(Integer.class.getName().equals(type)) obj.addProperty(field, result.getInt(i+1));
-				else if(Long.class.getName().equals(type)) obj.addProperty(field, result.getLong(i+1));				
+				else if(Long.class.getName().equals(type) || BigInteger.class.getName().equals(type)) obj.addProperty(field, result.getLong(i+1));				
 				else if(java.sql.Timestamp.class.getName().equals(type)) obj.addProperty(field, result.getTimestamp(i+1) == null ? null : result.getTimestamp(i+1).getTime());
 				else if(type.toUpperCase().endsWith(".CLOB")) obj.addProperty(field, result.getString(i+1));
 				else if(java.sql.Date.class.getName().equals(type)) obj.addProperty(field, result.getDate(i+1) == null ? null : result.getDate(i+1).getTime());
