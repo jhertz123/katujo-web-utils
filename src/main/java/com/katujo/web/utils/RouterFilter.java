@@ -94,6 +94,10 @@ public class RouterFilter implements Filter
 			//Get the print paths flag
 			boolean printPaths = "true".equals(config.getInitParameter("print-paths"));
 			
+			//There are no annotated classes
+			if(classes == null)
+				return;
+			
 			//Create the route objects
 			for(String clazz : classes)
 			{
