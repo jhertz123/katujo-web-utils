@@ -76,6 +76,69 @@ public class JsonUtils
 		throw new Exception("The member type is not regonised");
 	}	
 	
+	/**
+	 * Check if the object member is true or false.
+	 * 
+	 * <table border="1">
+	 * 	<tr><td><b>Type</b></td><td><b>Value</b></td><td><b>Returns</b></td></tr>
+	 * 	<tr><td>Array</td><td>any but null</td><td>true</td></tr>
+	 * 	<tr><td>Array</td><td>null</td><td>false</td></tr>
+	 * 	<tr><td>Boolean</td><td>true</td><td>true</td></tr>
+	 * 	<tr><td>Boolean</td><td>false</td><td>false</td></tr>
+	 * 	<tr><td>Number</td><td>Any but 0</td><td>true</td></tr>
+	 * 	<tr><td>Number</td><td>0</td><td>false</td></tr>
+	 * 	<tr><td>String</td><td>Any but empty</td><td>true</td></tr>
+	 * 	<tr><td>String</td><td>empty</td><td>false</td></tr>
+	 * 	<tr><td>Object</td><td>any but null</td><td>true</td></tr>
+	 *  <tr><td>Object</td><td>null</td><td>false</td></tr>
+	 *  <tr><td>*</td><td>obj or member is null or JSON null</td><td>false</td></tr>
+	 * </table>
+	 * 
+	 * @param obj
+	 * @param member
+	 * @return
+	 * @throws Exception
+	 */
+	public static boolean is(JsonObject obj, String member) throws Exception
+	{
+		//If object is not set return false
+		if(obj == null || obj.isJsonNull())
+			return false;
+		
+		//If the object does not have the member return false
+		if(!obj.has(member))
+			return false;
+			
+		//If the member is null return false
+		if(obj.get(member) == null || obj.get(member).isJsonNull())
+			return false;	
+		
+		//If the member is an object or an array return true (if set)
+		if(obj.get(member).isJsonObject() || obj.get(member).isJsonArray())
+			return true;
+		
+		//Get the object
+		Object get = get(obj, member);
+		
+		//If the get object is null return false
+		if(get == null)
+			return false;
+		
+		//If this is a boolean return as is 
+		if(get instanceof Boolean)
+			return (Boolean) get;
+		
+		//Double: 0 is false all other number are true
+		if(get instanceof Double)
+			return !((Double) get == 0); 		
+		
+		//String: empty string is false, all other are true
+		if(get instanceof String)
+			return !"".equals(get); 
+		
+		//Could not find a matching type
+		throw new Exception("The member type is not regonised");		
+	}	
 	
 	/**
 	 * Create a JSON array of JSON objects to hold the data in 
