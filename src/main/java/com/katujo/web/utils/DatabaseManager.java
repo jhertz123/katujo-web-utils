@@ -167,7 +167,7 @@ public class DatabaseManager
 	{
 		return getObject(sql, new Object[]{parameter});
 	}	
-	
+		
 	/**
 	 * Load a JSON object from the database using the SQL and the parameters.
 	 * <p>
@@ -178,7 +178,7 @@ public class DatabaseManager
 	 * @return
 	 * @throws Exception
 	 */
-	protected JsonObject getObject(String sql, Object[] parameters) throws Exception
+	protected JsonObject getObject(String sql, Object... parameters) throws Exception
 	{
 		//Fields
 		Connection connection = null;
@@ -257,7 +257,7 @@ public class DatabaseManager
 	 * @return
 	 * @throws Exception
 	 */
-	protected JsonArray getArray(String sql, Object[] parameters) throws Exception
+	protected JsonArray getArray(String sql, Object... parameters) throws Exception
 	{
 		//Fields
 		Connection connection = null;
@@ -317,7 +317,7 @@ public class DatabaseManager
 	 * @param parameters
 	 * @throws Exception
 	 */
-	protected void execute(String sql, Object[] parameters) throws Exception
+	protected void execute(String sql, Object... parameters) throws Exception
 	{
 		//Fields
 		Connection connection = null;
@@ -353,7 +353,7 @@ public class DatabaseManager
 	 * @param parameters
 	 * @throws Exception
 	 */
-	protected void execute(Connection connection, String sql, Object[] parameters) throws Exception
+	protected void execute(Connection connection, String sql, Object... parameters) throws Exception
 	{
 		//Fields
 		PreparedStatement statement = null;
