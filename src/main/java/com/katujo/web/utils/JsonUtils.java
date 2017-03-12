@@ -10,6 +10,7 @@ import java.sql.ResultSetMetaData;
 import java.util.concurrent.ConcurrentHashMap;
 
 
+
 //Google imports
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -75,6 +76,27 @@ public class JsonUtils
 		//Could not find a matching type
 		throw new Exception("The member type is not regonised");
 	}	
+	
+	/**
+	 * Check if the object member is true or false.
+	 * @param element
+	 * @param member
+	 * @return
+	 * @throws Exception
+	 */
+	public static boolean is(JsonElement element, String member) throws Exception
+	{
+		//Return false if element not set
+		if(element == null)
+			return false;
+		
+		//Call the is function with the element as an object
+		if(element.isJsonObject())
+			return is(element.getAsJsonObject(), member);
+		
+		//The is function can only handle JSON objects
+		throw new Exception("JSON element is not a JSON object");
+	}
 	
 	/**
 	 * Check if the object member is true or false.
@@ -226,7 +248,7 @@ public class JsonUtils
 					//Add the filed to the map
 					createJsonObjectColumnTranslator.put(column, field);				
 				}
-							
+											
 				//Add the field to the JSON object
 				if(String.class.getName().equals(type)) obj.addProperty(field, result.getString(i+1));
 				else if(Double.class.getName().equals(type)) obj.addProperty(field, result.getDouble(i+1));
@@ -234,9 +256,9 @@ public class JsonUtils
 				else if(Integer.class.getName().equals(type)) obj.addProperty(field, result.getInt(i+1));
 				else if(Long.class.getName().equals(type) || BigInteger.class.getName().equals(type)) obj.addProperty(field, result.getLong(i+1));				
 				else if(java.sql.Timestamp.class.getName().equals(type)) obj.addProperty(field, result.getTimestamp(i+1) == null ? null : result.getTimestamp(i+1).getTime());
-				else if(type.toUpperCase().endsWith(".CLOB")) obj.addProperty(field, result.getString(i+1));
+				else if(type.toUpperCase().endsWith(".CLOB") || "BINARY".equals(meta.getColumnTypeName(i+1))) obj.addProperty(field, result.getString(i+1));
 				else if(java.sql.Date.class.getName().equals(type)) obj.addProperty(field, result.getDate(i+1) == null ? null : result.getDate(i+1).getTime());
-				else if(Boolean.class.getName().equals(type)) obj.addProperty(field, result.getBoolean(i+1));
+				else if(Boolean.class.getName().equals(type)) obj.addProperty(field, result.getBoolean(i+1));				
 				else throw new Exception("There is no mapping for type: " + type);
 			}
 				
