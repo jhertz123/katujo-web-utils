@@ -249,7 +249,7 @@ public class JsonUtils
 					createJsonObjectColumnTranslator.put(column, field);				
 				}
 											
-				//Add the field to the JSON object
+				//Add the field to the JSON object 
 				if(String.class.getName().equals(type)) obj.addProperty(field, result.getString(i+1));
 				else if(Double.class.getName().equals(type)) obj.addProperty(field, result.getDouble(i+1));
 				else if(BigDecimal.class.getName().equals(type)) obj.addProperty(field, result.getDouble(i+1));
