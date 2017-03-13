@@ -335,7 +335,7 @@ public class JsonUtils
 			
 			//Populate the field names
 			for(int i=0; i<fieldNames.length; i++)
-				fieldNames[i] = columnToField(meta.getColumnName(i+1));
+				fieldNames[i] = columnToField(meta.getColumnLabel(i+1));
 			
 			//Return the field names
 			return fieldNames;		
