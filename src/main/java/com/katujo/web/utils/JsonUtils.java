@@ -11,6 +11,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 
 
+
+
+
 //Google imports
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -27,6 +30,18 @@ public class JsonUtils
 	//The map that holds the translation from SQL column format to JSON field name
 	//<SQL_COLUMN, JSON_FIELD>
 	private static final ConcurrentHashMap<String, String> createJsonObjectColumnTranslator = new ConcurrentHashMap<String, String>();	
+	
+	//Database types used when creating JSON objects and arrays	
+	private static enum DatabaseTypes
+	{
+		BOOLEAN,
+		DATE,
+		DOUBLE,
+		INTEGER,
+		LONG,
+		STRING,		
+		TIMESTAMP
+	}
 	
 	/**
 	 * Get the member value as an object.
@@ -177,9 +192,16 @@ public class JsonUtils
 			//Create the JSON array to hold the data
 			JsonArray data = new JsonArray();
 			
+			//Get the meta data
+			ResultSetMetaData meta = result.getMetaData();
+						
+			//Get the column types and the field names
+			DatabaseTypes[] columnTypes = getColumnTypes(meta);
+			String[] fieldNames = getFieldNames(meta);			
+			
 			//Read the result into the data
 			while(result.next())
-				data.add(createJsonObject(result));
+				data.add(createJsonObject(result, columnTypes, fieldNames));
 			
 			//Return the data
 			return data;			
@@ -200,66 +222,41 @@ public class JsonUtils
 	 */
 	public static JsonObject createJsonObject(ResultSet result) throws Exception
 	{
+		//Get the meta data
+		ResultSetMetaData meta = result.getMetaData();
+		
+		//Create the JSON object
+		return createJsonObject(result, getColumnTypes(meta), getFieldNames(meta));		
+	}
+	
+	/**
+	 * Create a JSON object from a result set row using the column types and the field names.
+	 * @param result
+	 * @param columnTypes
+	 * @param fieldNames
+	 * @return
+	 * @throws Exception
+	 */
+	public static JsonObject createJsonObject(ResultSet result, DatabaseTypes[] columnTypes, String[] fieldNames) throws Exception
+	{
 		//Try to create the JSON object
 		try
 		{
 			//Create the JSON object
 			JsonObject obj = new JsonObject();
-			
-			//Get the meta data
-			ResultSetMetaData meta = result.getMetaData();
-				
-			//Read the data into the object
-			for(int i=0; i<meta.getColumnCount(); i++)
-			{
-				//Get the column name
-				String column = meta.getColumnLabel(i+1);
-				
-				//Get the column type
-				String type = meta.getColumnClassName(i+1);
-
-				//Change to type long if field is BIG_DECIMAL and does not have a scale (Oracle number fix)
-				if(result.getMetaData().getScale(i+1) == 0 && BigDecimal.class.getName().equals(type))
-					type = Long.class.getName();				
-				
-				//Get the field name
-				String field = createJsonObjectColumnTranslator.get(column);
-				
-				//Create the field if not set
-				if(field == null)
-				{
-					//Split the column
-					String[] columnSplit = column.split("_");
-					
-					//Create the string builder to hold the filed
-					StringBuilder builder = new StringBuilder();
-
-					//Create the name in the builder
-					for(int y=0; y<columnSplit.length; y++)
-						if(y==0)
-							builder.append(columnSplit[y].toLowerCase());
-						else if(columnSplit[y].length() <= 2)
-							 builder.append(columnSplit[y]);
-						else  builder.append(columnSplit[y].substring(0, 1) + columnSplit[y].substring(1).toLowerCase());
 							
-					//Set the filed
-					field = builder.toString();
-					
-					//Add the filed to the map
-					createJsonObjectColumnTranslator.put(column, field);				
-				}
-											
-				//Add the field to the JSON object 
-				if(String.class.getName().equals(type)) obj.addProperty(field, result.getString(i+1));
-				else if(Double.class.getName().equals(type)) obj.addProperty(field, result.getDouble(i+1));
-				else if(BigDecimal.class.getName().equals(type)) obj.addProperty(field, result.getDouble(i+1));
-				else if(Integer.class.getName().equals(type)) obj.addProperty(field, result.getInt(i+1));
-				else if(Long.class.getName().equals(type) || BigInteger.class.getName().equals(type)) obj.addProperty(field, result.getLong(i+1));				
-				else if(java.sql.Timestamp.class.getName().equals(type)) obj.addProperty(field, result.getTimestamp(i+1) == null ? null : result.getTimestamp(i+1).getTime());
-				else if(type.toUpperCase().endsWith(".CLOB") || "BINARY".equals(meta.getColumnTypeName(i+1))) obj.addProperty(field, result.getString(i+1));
-				else if(java.sql.Date.class.getName().equals(type)) obj.addProperty(field, result.getDate(i+1) == null ? null : result.getDate(i+1).getTime());
-				else if(Boolean.class.getName().equals(type)) obj.addProperty(field, result.getBoolean(i+1));				
-				else throw new Exception("There is no mapping for type: " + type);
+			//Read the data into the object
+			for(int i=0; i<fieldNames.length; i++)
+			{															
+				//Add the data to the object
+				if(DatabaseTypes.STRING == columnTypes[i]) obj.addProperty(fieldNames[i], result.getString(i+1));
+				else if(DatabaseTypes.DOUBLE == columnTypes[i]) obj.addProperty(fieldNames[i], result.getDouble(i+1));
+				else if(DatabaseTypes.INTEGER == columnTypes[i]) obj.addProperty(fieldNames[i], result.getInt(i+1));
+				else if(DatabaseTypes.BOOLEAN == columnTypes[i]) obj.addProperty(fieldNames[i], result.getBoolean(i+1));
+				else if(DatabaseTypes.LONG == columnTypes[i]) obj.addProperty(fieldNames[i], result.getLong(i+1));
+				else if(DatabaseTypes.DATE == columnTypes[i]) obj.addProperty(fieldNames[i], result.getDate(i+1) == null ? null : result.getDate(i+1).getTime());											
+				else if(DatabaseTypes.TIMESTAMP == columnTypes[i]) obj.addProperty(fieldNames[i], result.getTimestamp(i+1) == null ? null : result.getTimestamp(i+1).getTime());
+				else throw new Exception("No mapping made for column type " + columnTypes[i]);
 			}
 				
 			//Return the JSON object
@@ -271,6 +268,122 @@ public class JsonUtils
 		{
 			throw new Exception("Failed to create the JSON object from the current result set row", ex);
 		}	
-	}		
+	}	
+	
+	/**
+	 * Get the column types.
+	 * @param meta
+	 * @return
+	 * @throws Exception
+	 */
+	private static DatabaseTypes[] getColumnTypes(ResultSetMetaData meta) throws Exception
+	{
+		//Try to get the column types
+		try
+		{
+			//Create the types array
+			DatabaseTypes[] types = new DatabaseTypes[meta.getColumnCount()];
+			
+			//Populate the types
+			for(int i=0; i<types.length; i++)
+			{
+				//Get the column type
+				String type = meta.getColumnClassName(i+1);
+				
+				//Change to type long if field is BIG_DECIMAL and does not have a scale (Oracle number fix)
+				if(meta.getScale(i+1) == 0 && BigDecimal.class.getName().equals(type))
+					type = Long.class.getName();					
+				
+				//Add the types to the array
+				if(String.class.getName().equals(type)) types[i] = DatabaseTypes.STRING;
+				else if(Double.class.getName().equals(type)) types[i] = DatabaseTypes.DOUBLE;
+				else if(BigDecimal.class.getName().equals(type)) types[i] = DatabaseTypes.DOUBLE;
+				else if(Integer.class.getName().equals(type)) types[i] = DatabaseTypes.INTEGER;
+				else if(Long.class.getName().equals(type) || BigInteger.class.getName().equals(type)) types[i] = DatabaseTypes.LONG;				
+				else if(java.sql.Timestamp.class.getName().equals(type)) types[i] = DatabaseTypes.TIMESTAMP;				
+				else if(java.sql.Date.class.getName().equals(type)) types[i] = DatabaseTypes.DATE;
+				else if(type.toUpperCase().endsWith(".CLOB") || "BINARY".equals(meta.getColumnTypeName(i+1))) types[i] = DatabaseTypes.STRING;
+				else if(Boolean.class.getName().equals(type)) types[i] = DatabaseTypes.BOOLEAN;
+				else throw new Exception("There is no mapping for type: " + type);												
+			}
+			
+			
+			//Return the types
+			return types;
+		}
+		
+		//Failed
+		catch(Exception ex)
+		{
+			throw new Exception("Failed to get the column types from the meta data", ex);
+		}
+	}
+	
+	/**
+	 * Get the field names for the columns.
+	 * @param meta
+	 * @return
+	 * @throws Exception
+	 */
+	private static String[] getFieldNames(ResultSetMetaData meta) throws Exception
+	{
+		//Try to get the field names
+		try
+		{
+			//Create the names array
+			String[] fieldNames = new String[meta.getColumnCount()];
+			
+			//Populate the field names
+			for(int i=0; i<fieldNames.length; i++)
+				fieldNames[i] = columnToField(meta.getColumnName(i+1));
+			
+			//Return the field names
+			return fieldNames;		
+		}
+		
+		//Failed
+		catch(Exception ex)
+		{
+			throw new Exception("Failed to get the field names", ex);
+		}
+	}
+	
+	/**
+	 * Translate a column name to a JSON field name.
+	 * @param column
+	 * @return
+	 */
+	private static String columnToField(String column)
+	{
+		//Get the field name
+		String field = createJsonObjectColumnTranslator.get(column);
+		
+		//Create the field if not set
+		if(field == null)
+		{
+			//Split the column
+			String[] columnSplit = column.split("_");
+			
+			//Create the string builder to hold the filed
+			StringBuilder builder = new StringBuilder();
+
+			//Create the name in the builder
+			for(int y=0; y<columnSplit.length; y++)
+				if(y==0)
+					builder.append(columnSplit[y].toLowerCase());
+				else if(columnSplit[y].length() <= 2)
+					 builder.append(columnSplit[y]);
+				else  builder.append(columnSplit[y].substring(0, 1) + columnSplit[y].substring(1).toLowerCase());
+					
+			//Set the filed
+			field = builder.toString();
+			
+			//Add the filed to the map
+			createJsonObjectColumnTranslator.put(column, field);				
+		}		
+		
+		//Return the filed
+		return field;
+	}
 
 }
