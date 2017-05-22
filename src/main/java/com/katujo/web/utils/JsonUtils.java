@@ -7,7 +7,10 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
+import java.util.Date;
 import java.util.concurrent.ConcurrentHashMap;
+
+
 
 
 
@@ -52,6 +55,10 @@ public class JsonUtils
 	 */	
 	public static Object get(JsonElement element, String member) throws Exception
 	{
+		//Check if null
+		if(element == null)
+			return null;
+		
 		//Check if object
 		if(!element.isJsonObject())
 			throw new Exception("Element is not a JSON object");
@@ -91,6 +98,51 @@ public class JsonUtils
 		//Could not find a matching type
 		throw new Exception("The member type is not regonised");
 	}	
+	
+	/**
+	 * Get the date from a number member.
+	 * @param element
+	 * @param member
+	 * @return
+	 * @throws Exception
+	 */
+	public static Date getDate(JsonElement element, String member) throws Exception
+	{
+		//Check if null
+		if(element == null)
+			return null;
+		
+		//Check if object
+		if(!element.isJsonObject())
+			throw new Exception("Element is not a JSON object");
+		
+		//Get the date
+		return getDate(element.getAsJsonObject(), member);
+	}
+	
+	/**
+	 * Get the date from a number member.
+	 * @param obj
+	 * @param member
+	 * @return
+	 * @throws Exception
+	 */
+	public static Date getDate(JsonObject obj, String member) throws Exception
+	{
+		//Get the getObject
+		Object getObj = get(obj, member);
+		
+		//Check if getObject is null
+		if(getObj == null)
+			return null;
+		
+		//Check if getObject is not a Double
+		if(!(getObj instanceof Double))
+			throw new Exception("Only number members can be cast to Date");
+		
+		//Create a date from the number value
+		return new Date(((Double) getObj).longValue());
+	}
 	
 	/**
 	 * Check if the object member is true or false.
