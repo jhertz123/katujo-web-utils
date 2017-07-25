@@ -2,22 +2,15 @@
 //Namespace
 package com.katujo.web.utils;
 
-//Java imports
+//Imports
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
+import java.sql.Timestamp;
 import java.util.Date;
 import java.util.concurrent.ConcurrentHashMap;
 
-
-
-
-
-
-
-
-//Google imports
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -302,15 +295,15 @@ public class JsonUtils
 			{															
 				//Add the data to the object
 				if(DatabaseTypes.STRING == columnTypes[i]) obj.addProperty(fieldNames[i], result.getString(i+1));
-				else if(DatabaseTypes.DOUBLE == columnTypes[i]) obj.addProperty(fieldNames[i], result.getDouble(i+1));
-				else if(DatabaseTypes.INTEGER == columnTypes[i]) obj.addProperty(fieldNames[i], result.getInt(i+1));
-				else if(DatabaseTypes.BOOLEAN == columnTypes[i]) obj.addProperty(fieldNames[i], result.getBoolean(i+1));
-				else if(DatabaseTypes.LONG == columnTypes[i]) obj.addProperty(fieldNames[i], result.getLong(i+1));
-				else if(DatabaseTypes.DATE == columnTypes[i]) obj.addProperty(fieldNames[i], result.getDate(i+1) == null ? null : result.getDate(i+1).getTime());											
-				else if(DatabaseTypes.TIMESTAMP == columnTypes[i]) obj.addProperty(fieldNames[i], result.getTimestamp(i+1) == null ? null : result.getTimestamp(i+1).getTime());
+				else if(DatabaseTypes.DOUBLE == columnTypes[i]) obj.addProperty(fieldNames[i], getDouble(result, i+1));
+				else if(DatabaseTypes.INTEGER == columnTypes[i]) obj.addProperty(fieldNames[i], getInteger(result, i+1));
+				else if(DatabaseTypes.BOOLEAN == columnTypes[i]) obj.addProperty(fieldNames[i], getBoolean(result, i+1));
+				else if(DatabaseTypes.LONG == columnTypes[i]) obj.addProperty(fieldNames[i], getLong(result, i+1));
+				else if(DatabaseTypes.DATE == columnTypes[i]) obj.addProperty(fieldNames[i], getDate(result, i+1));											
+				else if(DatabaseTypes.TIMESTAMP == columnTypes[i]) obj.addProperty(fieldNames[i], getTimestamp(result, i+1));
 				else throw new Exception("No mapping made for column type " + columnTypes[i]);
 			}
-				
+			
 			//Return the JSON object
 			return obj;			
 		}
@@ -342,6 +335,10 @@ public class JsonUtils
 				//Get the column type
 				String type = meta.getColumnClassName(i+1);
 				
+				//If class column type not found use database column type instead
+				if(type == null)
+					type = meta.getColumnTypeName(i+1);				
+				
 				//Change to type long if field is BIG_DECIMAL and does not have a scale (Oracle number fix)
 				if(meta.getScale(i+1) == 0 && BigDecimal.class.getName().equals(type))
 					type = Long.class.getName();					
@@ -349,12 +346,12 @@ public class JsonUtils
 				//Add the types to the array
 				if(String.class.getName().equals(type)) types[i] = DatabaseTypes.STRING;
 				else if(Double.class.getName().equals(type)) types[i] = DatabaseTypes.DOUBLE;
-				else if(BigDecimal.class.getName().equals(type)) types[i] = DatabaseTypes.DOUBLE;
+				else if(BigDecimal.class.getName().equals(type) || "BINARY_DOUBLE".equals(type)) types[i] = DatabaseTypes.DOUBLE;
 				else if(Integer.class.getName().equals(type)) types[i] = DatabaseTypes.INTEGER;
 				else if(Long.class.getName().equals(type) || BigInteger.class.getName().equals(type)) types[i] = DatabaseTypes.LONG;				
 				else if(java.sql.Timestamp.class.getName().equals(type)) types[i] = DatabaseTypes.TIMESTAMP;				
 				else if(java.sql.Date.class.getName().equals(type)) types[i] = DatabaseTypes.DATE;
-				else if(type.toUpperCase().endsWith(".CLOB") || "BINARY".equals(meta.getColumnTypeName(i+1))) types[i] = DatabaseTypes.STRING;
+				else if(type != null && (type.toUpperCase().endsWith(".CLOB") || "BINARY".equals(meta.getColumnTypeName(i+1)))) types[i] = DatabaseTypes.STRING;
 				else if(Boolean.class.getName().equals(type)) types[i] = DatabaseTypes.BOOLEAN;
 				else throw new Exception("There is no mapping for type: " + type);												
 			}
@@ -437,5 +434,165 @@ public class JsonUtils
 		//Return the filed
 		return field;
 	}
+	
+	/**
+	 * Get the boolean value if set or null if null.
+	 * @param result
+	 * @param index
+	 * @return
+	 * @throws Exception
+	 */
+	private static Boolean getBoolean(ResultSet result, int index) throws Exception
+	{
+		//Try to get the value
+		try
+		{
+			//Get the value
+			boolean value = result.getBoolean(index);
+			
+			//Check if null
+			if(result.wasNull())
+				return null;
+			
+			//Return the value
+			return value;
+		}
+		
+		//Failed
+		catch(Exception ex)
+		{
+			throw new Exception("Failed to get boolean form index " + index, ex);
+		}
+	}	
+	
+	/**
+	 * Get the timestamp as long for the date if set or null if not set.
+	 * @param result
+	 * @param index
+	 * @return
+	 * @throws Exception
+	 */
+	private static Long getDate(ResultSet result, int index) throws Exception
+	{
+		//Get the date
+		Date date = result.getDate(index);
+		
+		//Return null if null
+		if(date == null)
+			return null;
+		
+		//Return the timestamp if set
+		return date.getTime();
+	}
+	
+	/**
+	 * Get the double value if set or null if null.
+	 * @param result
+	 * @param index
+	 * @return
+	 * @throws Exception
+	 */
+	private static Double getDouble(ResultSet result, int index) throws Exception
+	{
+		//Try to get the value
+		try
+		{
+			//Get the value
+			double value = result.getDouble(index);
+			
+			//Check if null
+			if(result.wasNull())
+				return null;
+			
+			//Return the value
+			return value;
+		}
+		
+		//Failed
+		catch(Exception ex)
+		{
+			throw new Exception("Failed to get double form index " + index, ex);
+		}
+	}	
+	
+	/**
+	 * Get the integer value if set or null if null.
+	 * @param result
+	 * @param index
+	 * @return
+	 * @throws Exception
+	 */
+	private static Integer getInteger(ResultSet result, int index) throws Exception
+	{
+		//Try to get the value
+		try
+		{
+			//Get the value
+			int value = result.getInt(index);
+			
+			//Check if null
+			if(result.wasNull())
+				return null;
+			
+			//Return the value
+			return value;
+		}
+		
+		//Failed
+		catch(Exception ex)
+		{
+			throw new Exception("Failed to get integer form index " + index, ex);
+		}
+	}
+	
+	/**
+	 * Get the timestamp as long for the timestamp if set or null if not set.
+	 * @param result
+	 * @param index
+	 * @return
+	 * @throws Exception
+	 */
+	private static Long getTimestamp(ResultSet result, int index) throws Exception
+	{
+		//Get the date
+		Timestamp value = result.getTimestamp(index);
+		
+		//Return null if null
+		if(value == null)
+			return null;
+		
+		//Return the timestamp if set
+		return value.getTime();
+	}	
+	
+	/**
+	 * Get the long value if set or null if null.
+	 * @param result
+	 * @param index
+	 * @return
+	 * @throws Exception
+	 */
+	private static Long getLong(ResultSet result, int index) throws Exception
+	{
+		//Try to get the value
+		try
+		{
+			//Get the value
+			long value = result.getLong(index);
+			
+			//Check if null
+			if(result.wasNull())
+				return null;
+			
+			//Return the value
+			return value;
+		}
+		
+		//Failed
+		catch(Exception ex)
+		{
+			throw new Exception("Failed to get long form index " + index, ex);
+		}
+	}	
 
 }
