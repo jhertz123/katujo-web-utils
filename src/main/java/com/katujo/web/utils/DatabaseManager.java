@@ -2,10 +2,11 @@
 //Namespace
 package com.katujo.web.utils;
 
-//Java imports
+//Imports
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -13,8 +14,6 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
 
-
-//Google imports
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
@@ -196,8 +195,18 @@ public class DatabaseManager
 			
 			//Set the parameters if set 
 			if(parameters != null)
+			{
+				//Set the parameters
 				for(int i=0; i<parameters.length; i++)
-					statement.setObject(i+1, parameters[i]);
+				{
+					//Convert to SQL date when using java.util.Date parameter
+					if(parameters[i] instanceof Date)
+						statement.setObject(i+1, new java.sql.Date(((Date) parameters[i]).getTime()));
+
+					//Set the parameter
+					else statement.setObject(i+1, parameters[i]);
+				}
+			}
 			
 			//Run the statement
 			result = statement.executeQuery();
@@ -275,8 +284,18 @@ public class DatabaseManager
 			
 			//Set the parameters if set 
 			if(parameters != null)
+			{
+				//Set the parameters
 				for(int i=0; i<parameters.length; i++)
-					statement.setObject(i+1, parameters[i]);
+				{
+					//Convert to SQL date when using java.util.Date parameter
+					if(parameters[i] instanceof Date)
+						statement.setObject(i+1, new java.sql.Date(((Date) parameters[i]).getTime()));
+
+					//Set the parameter
+					else statement.setObject(i+1, parameters[i]);
+				}
+			}
 			
 			//Run the statement
 			result = statement.executeQuery();
@@ -366,8 +385,18 @@ public class DatabaseManager
 			
 			//Set the parameters if set 
 			if(parameters != null)
+			{
+				//Set the parameters
 				for(int i=0; i<parameters.length; i++)
-					statement.setObject(i+1, parameters[i]);
+				{
+					//Convert to SQL date when using java.util.Date parameter
+					if(parameters[i] instanceof Date)
+						statement.setObject(i+1, new java.sql.Date(((Date) parameters[i]).getTime()));
+
+					//Set the parameter
+					else statement.setObject(i+1, parameters[i]);
+				}
+			}
 			
 			//Execute the statement
 			statement.execute();
