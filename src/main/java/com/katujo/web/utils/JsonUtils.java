@@ -323,6 +323,9 @@ public class JsonUtils
 	 */
 	private static DatabaseTypes[] getColumnTypes(ResultSetMetaData meta) throws Exception
 	{
+		//Create the column index(used in catch)
+		int column = 0;
+		
 		//Try to get the column types
 		try
 		{
@@ -330,33 +333,37 @@ public class JsonUtils
 			DatabaseTypes[] types = new DatabaseTypes[meta.getColumnCount()];
 			
 			//Populate the types
-			for(int i=0; i<types.length; i++)
+			for(column=0; column<types.length; column++)
 			{
 				//Get the column type
-				String type = meta.getColumnClassName(i+1);
+				String type = meta.getColumnClassName(column+1);
 				
 				//If class column type not found use database column type instead
 				if(type == null)
-					type = meta.getColumnTypeName(i+1);				
+					type = meta.getColumnTypeName(column+1);
+				
+				//Type could not be set (will throw error)
+				if(type == null)
+					type = "NOT_SET";
 				
 				//Change to type long if field is BIG_DECIMAL and does not have a scale (Oracle number fix)
-				if(meta.getScale(i+1) == 0 && BigDecimal.class.getName().equals(type))
+				if(meta.getScale(column+1) == 0 && BigDecimal.class.getName().equals(type))
 					type = Long.class.getName();					
 				
 				//Add the types to the array
-				if(String.class.getName().equals(type)) types[i] = DatabaseTypes.STRING;
-				else if(Double.class.getName().equals(type)) types[i] = DatabaseTypes.DOUBLE;
-				else if(BigDecimal.class.getName().equals(type) || "BINARY_DOUBLE".equals(type)) types[i] = DatabaseTypes.DOUBLE;
-				else if(Integer.class.getName().equals(type)) types[i] = DatabaseTypes.INTEGER;
-				else if(Long.class.getName().equals(type) || BigInteger.class.getName().equals(type)) types[i] = DatabaseTypes.LONG;				
-				else if(java.sql.Timestamp.class.getName().equals(type)) types[i] = DatabaseTypes.TIMESTAMP;				
-				else if(java.sql.Date.class.getName().equals(type)) types[i] = DatabaseTypes.DATE;
-				else if(type != null && (type.toUpperCase().endsWith(".CLOB") || "BINARY".equals(meta.getColumnTypeName(i+1)))) types[i] = DatabaseTypes.STRING;
-				else if(Boolean.class.getName().equals(type)) types[i] = DatabaseTypes.BOOLEAN;
+				if(String.class.getName().equals(type)) types[column] = DatabaseTypes.STRING;
+				else if(Object.class.getName().equals(type)) types[column] = DatabaseTypes.STRING; //This is for null values like SELECT NULL AS MY_COLUMN FROM ...
+				else if(Double.class.getName().equals(type)) types[column] = DatabaseTypes.DOUBLE;
+				else if(BigDecimal.class.getName().equals(type) || type.contains("BINARY_DOUBLE")) types[column] = DatabaseTypes.DOUBLE;
+				else if(Integer.class.getName().equals(type)) types[column] = DatabaseTypes.INTEGER;
+				else if(Long.class.getName().equals(type) || BigInteger.class.getName().equals(type)) types[column] = DatabaseTypes.LONG;				
+				else if(java.sql.Timestamp.class.getName().equals(type)) types[column] = DatabaseTypes.TIMESTAMP;				
+				else if(java.sql.Date.class.getName().equals(type)) types[column] = DatabaseTypes.DATE;
+				else if(type != null && (type.toUpperCase().endsWith(".CLOB") || "BINARY".equals(meta.getColumnTypeName(column+1)))) types[column] = DatabaseTypes.STRING;
+				else if(Boolean.class.getName().equals(type)) types[column] = DatabaseTypes.BOOLEAN;
 				else throw new Exception("There is no mapping for type: " + type);												
 			}
-			
-			
+						
 			//Return the types
 			return types;
 		}
@@ -364,7 +371,14 @@ public class JsonUtils
 		//Failed
 		catch(Exception ex)
 		{
-			throw new Exception("Failed to get the column types from the meta data", ex);
+			//Create the column name 
+			String name = "";
+			
+			//Try to get the column name
+			try{name = meta.getColumnLabel(column+1);} catch(Throwable t) {}
+			
+			//Throw the exception
+			throw new Exception("Failed to get the column types from the meta data (failed on column " + name + " )", ex);
 		}
 	}
 	
