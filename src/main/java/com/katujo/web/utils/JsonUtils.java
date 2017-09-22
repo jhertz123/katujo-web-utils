@@ -359,7 +359,7 @@ public class JsonUtils
 				else if(Long.class.getName().equals(type) || BigInteger.class.getName().equals(type)) types[column] = DatabaseTypes.LONG;				
 				else if(java.sql.Timestamp.class.getName().equals(type)) types[column] = DatabaseTypes.TIMESTAMP;				
 				else if(java.sql.Date.class.getName().equals(type)) types[column] = DatabaseTypes.DATE;
-				else if(type != null && (type.toUpperCase().endsWith(".CLOB") || "BINARY".equals(meta.getColumnTypeName(column+1)))) types[column] = DatabaseTypes.STRING;
+				else if(type != null && (type.toUpperCase().endsWith(".CLOB") || type.toUpperCase().endsWith(".ORACLECLOB") || "BINARY".equals(meta.getColumnTypeName(column+1)))) types[column] = DatabaseTypes.STRING;
 				else if(Boolean.class.getName().equals(type)) types[column] = DatabaseTypes.BOOLEAN;
 				else throw new Exception("There is no mapping for type: " + type);												
 			}
