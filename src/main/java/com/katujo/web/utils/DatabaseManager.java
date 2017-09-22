@@ -6,6 +6,7 @@ package com.katujo.web.utils;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Timestamp;
 import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -199,8 +200,12 @@ public class DatabaseManager
 				//Set the parameters
 				for(int i=0; i<parameters.length; i++)
 				{
+					//Set the timestamp to avoid being shadowed by below date check
+					if(parameters[i] instanceof Timestamp)
+						statement.setObject(i+1, (Timestamp) parameters[i]);							
+					
 					//Convert to SQL date when using java.util.Date parameter
-					if(parameters[i] instanceof Date)
+					else if(parameters[i] instanceof Date)
 						statement.setObject(i+1, new java.sql.Date(((Date) parameters[i]).getTime()));
 
 					//Set the parameter
@@ -288,8 +293,12 @@ public class DatabaseManager
 				//Set the parameters
 				for(int i=0; i<parameters.length; i++)
 				{
+					//Set the timestamp to avoid being shadowed by below date check
+					if(parameters[i] instanceof Timestamp)
+						statement.setObject(i+1, (Timestamp) parameters[i]);							
+					
 					//Convert to SQL date when using java.util.Date parameter
-					if(parameters[i] instanceof Date)
+					else if(parameters[i] instanceof Date)
 						statement.setObject(i+1, new java.sql.Date(((Date) parameters[i]).getTime()));
 
 					//Set the parameter
@@ -389,8 +398,12 @@ public class DatabaseManager
 				//Set the parameters
 				for(int i=0; i<parameters.length; i++)
 				{
+					//Set the timestamp to avoid being shadowed by below date check
+					if(parameters[i] instanceof Timestamp)
+						statement.setObject(i+1, (Timestamp) parameters[i]);					
+					
 					//Convert to SQL date when using java.util.Date parameter
-					if(parameters[i] instanceof Date)
+					else if(parameters[i] instanceof Date)
 						statement.setObject(i+1, new java.sql.Date(((Date) parameters[i]).getTime()));
 
 					//Set the parameter
