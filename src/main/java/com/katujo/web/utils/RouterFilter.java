@@ -239,11 +239,14 @@ public class RouterFilter implements Filter
 	 */
 	private Object invoke(HttpServletRequest request, HttpServletResponse response) throws Exception
 	{
+		//Create the path (so it can be used in exception message)
+		String path = null;
+		
 		//Try to invoke route
 		try
 		{
 			//Get the path
-			String path = request.getServletPath();
+			path = request.getServletPath();
 			
 			//Get the route
 			Route route = routes.get(path);		
@@ -287,7 +290,7 @@ public class RouterFilter implements Filter
 				returnData = route.method.invoke(route.instance, requestData.getAsInt());
 			
 			//Invoke the method on the instance with a long as the parameter
-			else if(route.parameterType == Route.PRIMITIVE_INT) 
+			else if(route.parameterType == Route.PRIMITIVE_LONG) 
 				returnData = route.method.invoke(route.instance, requestData.getAsLong());
 			
 			//Invoke the method on the instance with a string as the parameter
@@ -308,7 +311,7 @@ public class RouterFilter implements Filter
 		//Failed
 		catch(Exception ex)
 		{
-			throw new Exception("Failed to invoke route", ex);
+			throw new Exception("Failed to invoke route for path " + path, ex);
 		}
 	}
 	
