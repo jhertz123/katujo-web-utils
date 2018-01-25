@@ -21,7 +21,6 @@ import com.google.gson.JsonObject;
 /**
  * Helps with database communication. 
  * @author Johan Hertz
- *
  */
 public class DatabaseManager
 {	
