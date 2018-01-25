@@ -239,8 +239,9 @@ public class RouterFilter implements Filter
 	 */
 	private Object invoke(HttpServletRequest request, HttpServletResponse response) throws Exception
 	{
-		//Create the path (so it can be used in exception message)
+		//Create fields that will be used in the exception message
 		String path = null;
+		JsonElement requestData = null;
 		
 		//Try to invoke route
 		try
@@ -259,7 +260,7 @@ public class RouterFilter implements Filter
 			Object returnData = null;
 			
 			//Get the request data
-			JsonElement requestData = JsonFilter.getJson();
+			requestData = JsonFilter.getJson();
 			
 			//Invoke the method on the instance with the no parameters
 			if(route.parameterType == Route.NO_PARAMETER) 
@@ -311,7 +312,18 @@ public class RouterFilter implements Filter
 		//Failed
 		catch(Exception ex)
 		{
-			throw new Exception("Failed to invoke route for path " + path, ex);
+			//Create the message
+			String message = "Failed to invoke route for path " + path;
+			
+			//Check if request data is set
+			if(requestData == null)
+				message += " (request data not set)";
+			
+			//Add the request data to the exception
+			else message += "\n\tRequest Data: " + requestData.toString();
+			
+			//Throw the exception
+			throw new Exception(message, ex);
 		}
 	}
 	
