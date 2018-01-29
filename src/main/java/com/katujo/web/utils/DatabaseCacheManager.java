@@ -12,6 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
@@ -19,7 +20,7 @@ import com.google.gson.JsonObject;
  * A database manager that has a cache of query results.
  * @author Johan Hertz
  */
-public class DatabaseCacheManager extends DatabaseManager
+public class DatabaseCacheManager extends com.katujo.web.utils.DatabaseManager
 {
 	//The cache to hold the query results
 	private final ConcurrentHashMap<String, CachedResult> cache = new ConcurrentHashMap<String, CachedResult>();
@@ -27,21 +28,77 @@ public class DatabaseCacheManager extends DatabaseManager
 	//The maximum size of the cache
 	private final int size;
 	
-	//The amount of results cleared from the cache when the size limit is reached 
+	//The results size after the clean has run (size will be drained to this) 
 	private final int clearSize;
 	
-	//The default timeout time for a cached result
-	private final int timeout;
+	//The default expiry time for a cached result
+	private final int expiry;
 	
 	//The flag if the cached is currently being cleaned
 	private final AtomicBoolean cleaning = new AtomicBoolean(false);
-			
+	
 	/**
 	 * Create the object.
+	 * <p>
+	 * This sets up the cache with the following default values.<br>
+	 * Cache size: 100<br>
+	 * Clear size: 80<br>
+	 * Expiry: 60 000 (one minute)
+	 * </p>
+	 * @param defaultDataSource
+	 */
+	public DatabaseCacheManager(String defaultDataSource)
+	{
+		//Call the super
+		super(defaultDataSource);
+		
+		//Set the max cache size
+		this.size = 100;
+		
+		//Set the clear size
+		this.clearSize = 80;
+		
+		//Set the expiry
+		this.expiry = 1 * 1000 * 60;		
+	}
+	
+	/**
+	 * Create the object.
+	 * <p>
+	 * This sets up the cache with the following default values.<br>
+	 * Clear size: 80<br>
+	 * Expiry: 60 000 (one minute)
+	 * </p>
 	 * @param defaultDataSource
 	 * @param size
 	 */
-	public DatabaseCacheManager(String defaultDataSource, int size, int clearSize, int timeout)
+	public DatabaseCacheManager(String defaultDataSource, int size)
+	{
+		//Call the super
+		super(defaultDataSource);
+		
+		//Set the max cache size
+		this.size = size;
+		
+		//Set the clear size
+		this.clearSize = 80;
+		
+		//Set the expiry
+		this.expiry = 1 * 1000 * 60;		
+	}		
+	
+	/**
+	 * Create the object.
+	 * <p>
+	 * This sets up the cache with the following default values.<br>
+	 * Expiry: 60 000 (one minute)
+	 * </p>
+	 * @param defaultDataSource
+	 * @param size
+	 * @param clearSize
+	 * @param expiry
+	 */
+	public DatabaseCacheManager(String defaultDataSource, int size, int clearSize)
 	{
 		//Call the super
 		super(defaultDataSource);
@@ -52,35 +109,80 @@ public class DatabaseCacheManager extends DatabaseManager
 		//Set the clear size
 		this.clearSize = clearSize;
 		
-		//Set the timeout
-		this.timeout = timeout;
+		//Set the expiry
+		this.expiry = 1 * 1000 * 60;
+	}	
+	
+	/**
+	 * Create the object.
+	 * @param defaultDataSource
+	 * @param size
+	 * @param clearSize
+	 * @param expiry
+	 */
+	public DatabaseCacheManager(String defaultDataSource, int size, int clearSize, int expiry)
+	{
+		//Call the super
+		super(defaultDataSource);
+		
+		//Set the max cache size
+		this.size = size;
+		
+		//Set the clear size
+		this.clearSize = clearSize;
+		
+		//Set the expiry
+		this.expiry = expiry;
 	}
 	
 	/**
-	 * Load a JSON object from the cache if not found then load object from 
+	 * Load a JSON array from the cache if not found or expired then load object from 
+	 * the database using the SQL.
+	 */
+	public JsonArray getCacheArray(String sql) throws Exception
+	{
+		return getCacheArrayExpiry(sql, expiry, new Object[]{});
+	}
+	
+	/**
+	 * Load a JSON array from the cache if not found or expired then load object from 
 	 * the database using the SQL and the parameters.
 	 * @param sql
 	 * @param parameters
 	 * @return
 	 * @throws Exception
 	 */
-	public JsonObject getCacheObject(String sql, int timeout, Object...parameters) throws Exception
+	public JsonArray getCacheArray(String sql, Object...parameters) throws Exception
 	{
-		//Try to get the cache object
-		try
-		{
+		return getCacheArrayExpiry(sql, expiry, parameters);
+	}
+	
+	/**
+	 * Load a JSON array from the cache if not found or expired then load object from 
+	 * the database using the SQL and the parameters.
+	 * @param sql
+	 * @param expiry
+	 * @param parameters
+	 * @return
+	 * @throws Exception
+	 */
+	public JsonArray getCacheArrayExpiry(String sql, int expiry, Object...parameters) throws Exception
+	{
+		//Try to get the cache array
+		try 
+		{			
 			//Create the key
 			String key = createQueryKey(sql, parameters);
-			
+						
 			//Get the cached result
 			CachedResult cached = cache.get(key);
 			
 			//Get the current time
 			long currentTime = System.currentTimeMillis();
-			
-			//Create a new cached result if current result is not found or old 
-			if(cached == null || cached.getTimestamp() + timeout > currentTime)
-				cache.put(key, cached = new CachedResult(this.getObject(sql, parameters)));
+									
+			//Create a new cached result if current result is not found or expired 
+			if(cached == null || cached.getTimestamp() + expiry < currentTime)				
+				cache.put(key, cached = new CachedResult(this.getArray(sql, parameters)));
 			
 			//Update the hit time
 			else cached.setHit(currentTime);
@@ -90,16 +192,89 @@ public class DatabaseCacheManager extends DatabaseManager
 				cleanCache();
 							
 			//Return the cached result
-			return cached.getResult().getAsJsonObject();
+			return cached.getResult().getAsJsonArray();				
 		}
 		
 		//Failed
-		catch(Exception ex)
+		catch(Exception ex) {throw new Exception("Failed to get cache array", ex);}				
+	}	
+	
+	/**
+	 * Load a JSON object from the cache if not found or expired then load object from
+	 * the database using the SQL.
+	 * <p>
+	 * This method uses the <b>default</b> timeout.
+	 * </p>
+	 * @param sql
+	 * @return
+	 * @throws Exception
+	 */
+	public JsonObject getCacheObject(String sql) throws Exception
+	{
+		return getCacheObjectExpiry(sql, expiry, new Object[]{});
+	}	
+	
+	/**
+	 * Load a JSON object from the cache if not found or expired then load object from
+	 * the database using the SQL and the parameters.
+	 * <p>
+	 * This method uses the <b>default</b> timeout.
+	 * </p>
+	 * @param sql
+	 * @param parameters
+	 * @return
+	 * @throws Exception
+	 */
+	public JsonObject getCacheObject(String sql, Object...parameters) throws Exception
+	{
+		return getCacheObjectExpiry(sql, expiry, parameters);
+	}
+	
+	/**
+	 * Load a JSON object from the cache if not found or expired then load object from 
+	 * the database using the SQL and the parameters.
+	 * @param sql
+	 * @param expiry
+	 * @param parameters
+	 * @return
+	 * @throws Exception
+	 */
+	public JsonObject getCacheObjectExpiry(String sql, int expiry, Object...parameters) throws Exception
+	{
+		//Try to get the cache object
+		try 
+		{						
+			//Create the key
+			String key = createQueryKey(sql, parameters);
+			
+			//Get the cached result
+			CachedResult cached = cache.get(key);
+			
+			//Get the current time
+			long currentTime = System.currentTimeMillis();
+												
+			//Create a new cached result if current result is not found or expired 
+			if(cached == null || cached.getTimestamp() + expiry < currentTime)				
+				cache.put(key, cached = new CachedResult(this.getObject(sql, parameters)));
+			
+			//Update the hit time
+			else cached.setHit(currentTime);
+			
+			//Check if to clean the cache
+			if(cache.size() > size)
+				cleanCache();
+							
+			//Return the cached result
+			return cached.getResult().getAsJsonObject();				
+		}
+		
+		//Failed
+		catch(Exception ex) 
 		{
 			throw new Exception("Failed to get cache object", ex);
 		}		
 	}
-	
+			
 	/**
 	 * Clean the cache.
 	 */
@@ -109,7 +284,7 @@ public class DatabaseCacheManager extends DatabaseManager
 		if(cleaning.getAndSet(true))
 			return;
 		
-		//Create a references to use in the thread 
+		//Create references to use in the thread 
 		final ConcurrentHashMap<String, CachedResult> cache = this.cache;
 		final int clearSize = this.clearSize;
 		final AtomicBoolean cleaning = this.cleaning;
@@ -118,8 +293,8 @@ public class DatabaseCacheManager extends DatabaseManager
 		Thread thread = new Thread()
 		{									
 			public void run()
-			{
-				//Create a map of results to remove from the cache
+			{				
+				//Create a list with all results in the cache
 				//[String, CachedResult]
 				List<Entry<String, CachedResult>> list = new ArrayList<Entry<String, CachedResult>>(cache.size());
 				
@@ -135,16 +310,17 @@ public class DatabaseCacheManager extends DatabaseManager
 			        }						        
 				};	
 				
-				//Sort the list
+				//Sort the list so the oldest result is first in the list
 				Collections.sort(list, comparator);
 				
-				//Remove the number of result equal to the clear size or size of the list
-				//which every is the smallest
-				for(int i=0; i<list.size() && i<clearSize; i++)	
+				//Remove results until list size = clearSize (or until list has no more results)
+				for(int i=0; i<list.size() && cache.size()>clearSize; i++)						
 					cache.remove(list.get(i).getKey());
 				
 				//Set the cleaning flag
 				cleaning.set(false);
+				
+				System.out.println("Size after clean: " + cache.size());
 			}			
 		};
 				
@@ -217,7 +393,8 @@ public class DatabaseCacheManager extends DatabaseManager
 		 */
 		public JsonElement getResult()
 		{
-			return result;
+			//The deep copy is needed since this object is shared 
+			return result.deepCopy();
 		}
 
 		/**
