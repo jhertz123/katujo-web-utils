@@ -486,6 +486,10 @@ public class RouterFilter implements Filter
 			//Get the classes marked with the controller annotation
 			Set<String> classes = database.getAnnotationIndex().get(com.katujo.web.utils.Route.class.getCanonicalName());
 			
+			//Return empty if not set
+			if(classes == null)
+				return new HashSet<String>();
+			
 			//Return the classes
 			return classes;			
 		}
