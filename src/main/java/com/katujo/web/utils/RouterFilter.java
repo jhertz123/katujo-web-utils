@@ -10,6 +10,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -17,6 +18,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
@@ -72,31 +74,28 @@ public class RouterFilter implements Filter
 	{
 		//Try to init the filter
 		try
-		{
-			//Get the URL
-			URL url = WarUrlFinder.findWebInfClassesPath(config.getServletContext());
+		{			
+			//Get the scanned classes
+			Set<String> classesScanned = scanRoutes(config);
 			
-			//Create the annotation database
-			AnnotationDB database = new AnnotationDB();
+			//Get the web.xml classes
+			Set<String> classesWebXml = webXmlRoutes(config);
 			
-			//Scan the URL
-			database.scanArchives(url);
+			//Create the classes
+			Set<String> classes = new HashSet<String>(classesScanned.size() + classesWebXml.size());
 			
-			//Get the classes marked with the controller annotation
-			Set<String> classes = database.getAnnotationIndex().get(com.katujo.web.utils.Route.class.getCanonicalName());
+			//Add the classes
+			classes.addAll(classesScanned);
+			classes.addAll(classesWebXml);
 			
 			//Get the package to scan
-			String scanPackage = config.getInitParameter("scan");
-			
+			String scanPackage = config.getInitParameter("scan");			
+						
 			//Get the extension that will be added to the end of every path 
 			String extension = config.getInitParameter("extension");
 			
 			//Get the print paths flag
 			boolean printPaths = "true".equals(config.getInitParameter("print-paths"));
-			
-			//There are no annotated classes
-			if(classes == null)
-				return;
 			
 			//Create the route objects
 			for(String clazz : classes)
@@ -455,7 +454,85 @@ public class RouterFilter implements Filter
 	public static HttpServletResponse getResponse()
 	{
 		return response.get();
-	}		
+	}	
+	
+	/**
+	 * Scan for the routes.
+	 * @param config
+	 * @return
+	 * @throws Exception
+	 */
+	private static Set<String> scanRoutes(FilterConfig config) throws Exception
+	{
+		//Try to scan for routes
+		try
+		{			
+			//Get the URL
+			URL url = WarUrlFinder.findWebInfClassesPath(config.getServletContext());
+			
+			//Could not find the URL
+			if(url == null)
+				return new HashSet<String>();
+			
+			//Create the annotation database
+			AnnotationDB database = new AnnotationDB();
+			
+			//Scan the URL
+			database.scanArchives(url);
+			
+			//Get the classes marked with the controller annotation
+			Set<String> classes = database.getAnnotationIndex().get(com.katujo.web.utils.Route.class.getCanonicalName());
+			
+			//Return the classes
+			return classes;			
+		}
+		
+		//Failed
+		catch(Exception ex)
+		{
+			throw new Exception("Failed to scan for routes", ex);
+		}
+	}
+	
+	/**
+	 * Read the routes from the web.xml file.
+	 * @param config
+	 * @return
+	 * @throws Exception
+	 */
+	private static Set<String> webXmlRoutes(FilterConfig config) throws Exception
+	{
+		//Try to read the routes from the web.xml file
+		try
+		{
+			//Get the routes
+			String routes = config.getInitParameter("routes");
+			
+			//Check if routes is set
+			if(routes == null)
+				return new HashSet<String>();
+			
+			//Split the routes
+			String[] split = routes.split(";");
+			
+			//Create the set
+			Set<String> classes = new HashSet<String>();
+			
+			//Add the classes
+			for(String item : split)
+				if(!item.trim().equals(""))
+					classes.add(item.trim());
+			
+			//Return the set
+			return classes;			
+		}
+		
+		//Failed
+		catch(Exception ex)
+		{
+			throw new Exception("Failed to read web.xml routes", ex);
+		}
+	}
 
 	/*
 	 * Class to hold a route.
