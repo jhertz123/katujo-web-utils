@@ -87,9 +87,13 @@ public class RouterFilter implements Filter
 			classes.addAll(classesScanned);
 			classes.addAll(classesWebXml);
 			
-			//Get the package to scan
-			String scanPackage = config.getInitParameter("scan");			
-						
+			//Get the base package
+			//TODO: Remove legacy scan property
+			String basePackage = config.getInitParameter("base-package") != null ? config.getInitParameter("base-package") : config.getInitParameter("scan");
+			
+			//Set the default base package to empty string
+			basePackage = basePackage != null ? basePackage : "";  
+										
 			//Get the extension that will be added to the end of every path 
 			String extension = config.getInitParameter("extension");
 			
@@ -105,15 +109,15 @@ public class RouterFilter implements Filter
 				//Get the package name
 				String routePackage = routeClass.getPackage().getName();
 				
-				//Check if the package match the scan package
-				if(!routePackage.startsWith(scanPackage))
+				//Check if the package match the base package
+				if(!routePackage.startsWith(basePackage))
 					continue;
 																		
 				//Create an instance of the route
 				Object instance = routeClass.getConstructor(new Class[] {}).newInstance(new Object[]{});
 				
 				//Create the base path 
-				String base = routePackage.substring(scanPackage.length()).replace('.', '/') + "/";
+				String base = routePackage.substring(basePackage.length()).replace('.', '/') + "/";
 								
 				//Add the controller methods
 				for(Method method : routeClass.getMethods())
