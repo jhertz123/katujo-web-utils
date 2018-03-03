@@ -319,8 +319,6 @@ public class DatabaseCacheManager extends com.katujo.web.utils.DatabaseManager
 				
 				//Set the cleaning flag
 				cleaning.set(false);
-				
-				System.out.println("Size after clean: " + cache.size());
 			}			
 		};
 				
