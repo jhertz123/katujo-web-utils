@@ -8,6 +8,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -149,8 +150,23 @@ public class DatabaseManager
 	 */
 	protected JsonObject getObject(String sql) throws Exception
 	{
-		return getObject(sql, new Object[]{});
+		return getObject(sql, new Object[]{});				 
 	}
+	
+	/**
+	 * Load a JSON object from the database using the SQL and the parameter.
+	 * <p>
+	 * If no result matched the query, null will be returned.
+	 * </p>
+	 * @param sql
+	 * @param parameter
+	 * @return
+	 * @throws Exception
+	 */
+	protected JsonObject getObject(String sql, List<Object> parameter) throws Exception
+	{
+		return getObject(sql, parameter.toArray(new Object[parameter.size()]));
+	}		
 	
 	/**
 	 * Load a JSON object from the database using the SQL and the parameter.
@@ -250,6 +266,18 @@ public class DatabaseManager
 	{
 		return getArray(sql, new Object[]{});
 	}
+	
+	/**
+	 * Load a JSON array of JSON objects from the database using SQL and the parameter.
+	 * @param sql
+	 * @param parameter
+	 * @return
+	 * @throws Exception
+	 */
+	protected JsonArray getArray(String sql, List<Object> parameter) throws Exception
+	{						
+		return getArray(sql, parameter.toArray(new Object[parameter.size()]));
+	}		
 	
 	/**
 	 * Load a JSON array of JSON objects from the database using SQL and the parameter.
