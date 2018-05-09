@@ -45,6 +45,9 @@ public class RouterFilter implements Filter
 	//The map to hold the routes <String=path, Route> 
 	private final Map<String, Route> routes = new ConcurrentHashMap<String, Route>();
 	
+	//The map/set to hold the path where to mask request data on error (String=path, IGNORE)
+	private final Map<String, Object> maskOnError = new ConcurrentHashMap<String, Object>();
+	
 	//The no parameters object
 	private static final Object[] NO_PARAMETERS = new Object[]{};	
 	
@@ -74,6 +77,10 @@ public class RouterFilter implements Filter
 		//Try to init the filter
 		try
 		{			
+			//Get the path where to mask request data
+			for(String path : maskRequestDataOnError(config))
+				maskOnError.put(path, NO_PARAMETERS);
+			
 			//Get the scanned classes
 			Set<String> classesScanned = scanRoutes(config);
 			
@@ -317,8 +324,12 @@ public class RouterFilter implements Filter
 			//Create the message
 			String message = "Failed to invoke route for path " + path;
 			
+			//Check if masked
+			if(maskOnError.containsKey(path))
+				message += "\n\tRequest Data: **MASKED**";
+			
 			//Check if request data is set
-			if(requestData == null)
+			else if(requestData == null)
 				message += " (request data not set)";
 			
 			//Add the request data to the exception
@@ -540,6 +551,46 @@ public class RouterFilter implements Filter
 			throw new Exception("Failed to read web.xml routes", ex);
 		}
 	}
+	
+	/**
+	 * Read the routes from the web.xml file.
+	 * @param config
+	 * @return
+	 * @throws Exception
+	 */
+	private static Set<String> maskRequestDataOnError(FilterConfig config) throws Exception
+	{
+		//Try to read the routes from the web.xml file
+		try
+		{
+			//Get the routes
+			String paths = config.getInitParameter("mask-request-data-on-error");
+			
+			//Check if routes is set
+			if(paths == null)
+				return new HashSet<String>();
+			
+			//Split the routes
+			String[] split = paths.split(";");
+			
+			//Create the set of paths
+			Set<String> set = new HashSet<String>();
+			
+			//Add the classes
+			for(String item : split)
+				if(!item.trim().equals(""))
+					set.add(item.trim());
+			
+			//Return the set
+			return set;			
+		}
+		
+		//Failed
+		catch(Exception ex)
+		{
+			throw new Exception("Failed to read web.xml mask-request-data-on-error", ex);
+		}
+	}	
 
 	/*
 	 * Class to hold a route.
