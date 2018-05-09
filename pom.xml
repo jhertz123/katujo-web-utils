@@ -5,7 +5,7 @@
   	<groupId>com.katujo</groupId>
   	<artifactId>katujo-web-utils</artifactId>
   	<packaging>jar</packaging>
-  	<version>0.0.16-SNAPSHOT</version>
+  	<version>0.0.17-SNAPSHOT</version>
   	 <!-- 
   	<version>0.0.1</version>
   	 -->
