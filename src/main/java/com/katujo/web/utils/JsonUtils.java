@@ -354,10 +354,12 @@ public class JsonUtils
 				if(String.class.getName().equals(type)) types[column] = DatabaseTypes.STRING;
 				else if(Object.class.getName().equals(type)) types[column] = DatabaseTypes.STRING; //This is for null values like SELECT NULL AS MY_COLUMN FROM ...
 				else if(Double.class.getName().equals(type)) types[column] = DatabaseTypes.DOUBLE;
+				else if(Float.class.getName().equals(type)) types[column] = DatabaseTypes.DOUBLE;
 				else if(BigDecimal.class.getName().equals(type) || type.contains("BINARY_DOUBLE")) types[column] = DatabaseTypes.DOUBLE;
 				else if(Integer.class.getName().equals(type)) types[column] = DatabaseTypes.INTEGER;
 				else if(Long.class.getName().equals(type) || BigInteger.class.getName().equals(type)) types[column] = DatabaseTypes.LONG;				
-				else if(java.sql.Timestamp.class.getName().equals(type)) types[column] = DatabaseTypes.TIMESTAMP;				
+				else if(java.sql.Timestamp.class.getName().equals(type)) types[column] = DatabaseTypes.TIMESTAMP;
+				else if(java.sql.Time.class.getName().equals(type)) types[column] = DatabaseTypes.TIMESTAMP; //TODO: Implement the time database type
 				else if(java.sql.Date.class.getName().equals(type)) types[column] = DatabaseTypes.DATE;
 				else if(type != null && (type.toUpperCase().endsWith(".CLOB") || type.toUpperCase().endsWith(".ORACLECLOB") || "BINARY".equals(meta.getColumnTypeName(column+1)))) types[column] = DatabaseTypes.STRING;
 				else if(Boolean.class.getName().equals(type)) types[column] = DatabaseTypes.BOOLEAN;
