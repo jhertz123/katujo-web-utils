@@ -109,7 +109,7 @@ public class JsonUtils
 		if(!element.isJsonObject())
 			throw new Exception("Element is not a JSON object");
 		
-		//Get the date
+		//Get the value
 		return getDate(element.getAsJsonObject(), member);
 	}
 	
@@ -135,6 +135,195 @@ public class JsonUtils
 		
 		//Create a date from the number value
 		return new Date(((Double) getObj).longValue());
+	}
+	
+	/**
+	 * Get a number property from a JSON element as double.
+	 * @param element
+	 * @param property
+	 * @return
+	 * @throws Exception
+	 */
+	public static Double getDouble(JsonElement element, String property) throws Exception
+	{
+		//Check if null
+		if(element == null)
+			return null;
+		
+		//Check if object
+		if(!element.isJsonObject())
+			throw new Exception("Element is not a JSON object");
+		
+		//Get the value
+		return getDouble(element.getAsJsonObject(), property);				
+	}
+	 		
+	/**
+	 * Get a number property from a JSON object as double.
+	 * @param obj
+	 * @param property
+	 * @return
+	 * @throws Exception
+	 */
+	public static Double getDouble(JsonObject obj, String property) throws Exception
+	{
+		//Get the getObject
+		Object getObj = get(obj, property);
+		
+		//Check if getObject is null
+		if(getObj == null)
+			return null;	
+		
+		//Return double if double
+		if(getObj instanceof Double)
+			return (Double) getObj;
+		
+		//Return the float as double
+		if(getObj instanceof Float)
+			return ((Float) getObj).doubleValue();
+		
+		//Return the integer as double
+		if(getObj instanceof Integer)
+			return ((Integer) getObj).doubleValue();	
+		
+		//Could not find a matching number type
+		throw new Exception("Type is not recognised as number " + getObj.getClass().getSimpleName());
+	}
+	
+	/**
+	 * Get a number property from a JSON element as float.
+	 * @param element
+	 * @param property
+	 * @return
+	 * @throws Exception
+	 */
+	public static Float getFloat(JsonElement element, String property) throws Exception
+	{
+		//Check if null
+		if(element == null)
+			return null;
+		
+		//Check if object
+		if(!element.isJsonObject())
+			throw new Exception("Element is not a JSON object");
+		
+		//Get the value
+		return getFloat(element.getAsJsonObject(), property);				
+	}	
+	
+	/**
+	 * Get a number property from a JSON object as float.
+	 * @param obj
+	 * @param property
+	 * @return
+	 * @throws Exception
+	 */
+	public static Float getFloat(JsonObject obj, String property) throws Exception
+	{
+		//Get the getObject
+		Object getObj = get(obj, property);
+		
+		//Check if getObject is null
+		if(getObj == null)
+			return null;	
+		
+		//Return float as double
+		if(getObj instanceof Double)
+			return ((Double) getObj).floatValue();
+		
+		//Return the float as float
+		if(getObj instanceof Float)
+			return (Float) getObj;
+		
+		//Return the integer as float
+		if(getObj instanceof Integer)
+			return ((Integer) getObj).floatValue();	
+		
+		//Could not find a matching number type
+		throw new Exception("Type is not recognised as number " + getObj.getClass().getSimpleName());
+	}	
+	
+	/**
+	 * Get a number property from a JSON object as integer.
+	 * @param obj
+	 * @param property
+	 * @return
+	 * @throws Exception
+	 */
+	public static Integer getInt(JsonObject obj, String property) throws Exception
+	{
+		//Get the getObject
+		Object getObj = get(obj, property);
+		
+		//Check if getObject is null
+		if(getObj == null)
+			return null;	
+		
+		//Return double as integer
+		if(getObj instanceof Double)
+			return ((Double) getObj).intValue();
+		
+		//Return the float as integer
+		if(getObj instanceof Float)
+			return ((Float) getObj).intValue();
+		
+		//Return the integer as integer
+		if(getObj instanceof Integer)
+			return (Integer) getObj;	
+		
+		//Could not find a matching number type
+		throw new Exception("Type is not recognised as number " + getObj.getClass().getSimpleName());
+	}	
+	
+	/**
+	 * Get a string property from a JSON element.
+	 * <p>
+	 * If the property is not of string type the toString() method will be called on the object.
+	 * </p> 
+	 * @param element
+	 * @param property
+	 * @return
+	 * @throws Exception
+	 */
+	public static String getString(JsonElement element, String property) throws Exception
+	{
+		//Check if null
+		if(element == null)
+			return null;
+		
+		//Check if object
+		if(!element.isJsonObject())
+			throw new Exception("Element is not a JSON object");
+		
+		//Get the value
+		return getString(element.getAsJsonObject(), property);		
+	}
+	
+	/**
+	 * Get a string property from a JSON object.
+	 * <p>
+	 * If the property is not of string type the toString() method will be called on the object.
+	 * </p>
+	 * @param obj
+	 * @param property
+	 * @return
+	 * @throws Exception
+	 */
+	public static String getString(JsonObject obj, String property) throws Exception
+	{
+		//Get the getObject
+		Object getObj = get(obj, property);
+		
+		//Check if getObject is null
+		if(getObj == null)
+			return null;	
+		
+		//Check if string
+		if(getObj instanceof String)
+			return (String) getObj;
+		
+		//Return the toString result for the object
+		return getObj.toString();		
 	}
 	
 	/**
