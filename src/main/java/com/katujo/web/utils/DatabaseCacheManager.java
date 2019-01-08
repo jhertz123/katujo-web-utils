@@ -24,6 +24,9 @@ public class DatabaseCacheManager extends com.katujo.web.utils.DatabaseManager
 {
 	//The cache to hold the query results
 	private final ConcurrentHashMap<String, CachedResult> cache = new ConcurrentHashMap<String, CachedResult>();
+	
+	//The cache locks used when loading new data to the cache
+	private final ConcurrentHashMap<String, Object> locks = new ConcurrentHashMap<String, Object>();
 			
 	//The maximum size of the cache
 	private final int size;
@@ -173,6 +176,9 @@ public class DatabaseCacheManager extends com.katujo.web.utils.DatabaseManager
 		{			
 			//Create the key
 			String key = createQueryKey(sql, parameters);
+			
+			//Get the lock
+			Object lock = getLock(key);
 						
 			//Get the cached result
 			CachedResult cached = cache.get(key);
@@ -181,8 +187,19 @@ public class DatabaseCacheManager extends com.katujo.web.utils.DatabaseManager
 			long currentTime = System.currentTimeMillis();
 									
 			//Create a new cached result if current result is not found or expired 
-			if(cached == null || cached.getTimestamp() + expiry < currentTime)				
-				cache.put(key, cached = new CachedResult(this.getArray(sql, parameters)));
+			if(cached == null || cached.getTimestamp() + expiry < currentTime)		
+			{
+				//Lock the call for a new result so only one call at a time can be made
+				synchronized(lock)
+				{					
+					//Get the cached result again
+					cached = cache.get(key);	
+					
+					//Check one more time to query for the new data 
+					if(cached == null || cached.getTimestamp() + expiry < currentTime)										
+						cache.put(key, cached = new CachedResult(this.getArray(sql, parameters)));
+				}
+			}
 			
 			//Update the hit time
 			else cached.setHit(currentTime);
@@ -354,6 +371,24 @@ public class DatabaseCacheManager extends com.katujo.web.utils.DatabaseManager
 		//Return the builder string
 		return builder.toString();
 	}	
+	
+	/**
+	 * Get the lock used when refreshing the cache.
+	 * @param queryKey
+	 * @return
+	 */
+	private Object getLock(String queryKey)
+	{
+		//Get the lock 
+		Object lock = locks.get(queryKey);
+		
+		//Create the lock if not set
+		if(lock == null)
+			this.locks.put(queryKey, lock = new Object());
+		
+		//Return the lock
+		return lock;
+	}
 	
 	/**
 	 * Holds a result for a query, used in the cache.
