@@ -258,12 +258,29 @@ public class RouterFilter implements Filter
 			//Get the path
 			path = request.getServletPath();
 			
+			//Try to get the path from the URI instead
+			if(path == null || "".equals(path))
+			{
+				//Get the URI
+				String uri = request.getRequestURI();
+								
+				//Get the index of the second /
+				int index = uri.indexOf('/', 3);
+				
+				//Clean the path
+				path = uri.substring(index);	
+				
+				//Remove the first duplicate /
+				if(path.startsWith("//"))
+					path = path.substring(1);
+			}			
+			
 			//Get the route
 			Route route = routes.get(path);		
 			
 			//Check if there is a route for the path
 			if(route == null)
-				throw new Exception("Could not find a route for path " + path);
+				throw new Exception("Could not find a route for path \"" + path + "\"");
 			
 			//Create the return data
 			Object returnData = null;
