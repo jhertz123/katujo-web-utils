@@ -207,9 +207,16 @@ public class DatabaseCacheManager extends com.katujo.web.utils.DatabaseManager
 			//Check if to clean the cache
 			if(this.cache.size() > this.size)
 				cleanCache();
+			
+			//Get the cached result
+			JsonElement element = cached.getResult();
+			
+			//Return null if not set
+			if(element == null)
+				return null;
 							
 			//Return the cached result
-			return cached.getResult().getAsJsonArray();				
+			return element.getAsJsonArray();				
 		}
 		
 		//Failed
@@ -280,9 +287,16 @@ public class DatabaseCacheManager extends com.katujo.web.utils.DatabaseManager
 			//Check if to clean the cache
 			if(cache.size() > size)
 				cleanCache();
+			
+			//Get the cached result
+			JsonElement element = cached.getResult();
+			
+			//Return null if not set
+			if(element == null)
+				return null;
 							
 			//Return the cached result
-			return cached.getResult().getAsJsonObject();				
+			return element.getAsJsonObject();				
 		}
 		
 		//Failed
@@ -426,6 +440,10 @@ public class DatabaseCacheManager extends com.katujo.web.utils.DatabaseManager
 		 */
 		public JsonElement getResult()
 		{
+			//Return null if result is not set
+			if(result == null)
+				return null;
+			
 			//The deep copy is needed since this object is shared 
 			return result.deepCopy();
 		}
