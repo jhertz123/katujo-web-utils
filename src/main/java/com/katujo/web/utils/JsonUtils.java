@@ -244,7 +244,28 @@ public class JsonUtils
 	}	
 	
 	/**
-	 * Get a number property from a JSON object as integer.
+	 * Get a number property from a JSON element as an integer.
+	 * @param obj
+	 * @param property
+	 * @return
+	 * @throws Exception
+	 */	
+	public static Integer getInt(JsonElement element, String property) throws Exception
+	{
+		//Check if null
+		if(element == null)
+			return null;
+		
+		//Check if object
+		if(!element.isJsonObject())
+			throw new Exception("Element is not a JSON object");
+		
+		//Get the value
+		return getInt(element.getAsJsonObject(), property);				
+	}		
+	
+	/**
+	 * Get a number property from a JSON object as an integer.
 	 * @param obj
 	 * @param property
 	 * @return
