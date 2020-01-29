@@ -154,6 +154,21 @@ public class DatabaseManager
 	}
 	
 	/**
+	 * Load a JSON object from the database using the SQL.
+	 * <p>
+	 * If no result matched the query null will be returned.
+	 * </p>
+	 * @param connection
+	 * @param sql
+	 * @return
+	 * @throws Exception
+	 */
+	protected JsonObject getObject(Connection connection, String sql) throws Exception
+	{
+		return getObject(sql, new Object[]{});				 
+	}	
+	
+	/**
 	 * Load a JSON object from the database using the SQL and the parameter.
 	 * <p>
 	 * If no result matched the query, null will be returned.
@@ -166,6 +181,22 @@ public class DatabaseManager
 	protected JsonObject getObject(String sql, List<Object> parameter) throws Exception
 	{
 		return getObject(sql, parameter.toArray(new Object[parameter.size()]));
+	}	
+	
+	/**
+	 * Load a JSON object from the database using the SQL and the parameter.
+	 * <p>
+	 * If no result matched the query, null will be returned.
+	 * </p>
+	 * @param connection
+	 * @param sql
+	 * @param parameter
+	 * @return
+	 * @throws Exception
+	 */
+	protected JsonObject getObject(Connection connection, String sql, List<Object> parameter) throws Exception
+	{
+		return getObject(connection, sql, parameter.toArray(new Object[parameter.size()]));
 	}		
 	
 	/**
@@ -182,6 +213,22 @@ public class DatabaseManager
 	{
 		return getObject(sql, new Object[]{parameter});
 	}	
+	
+	/**
+	 * Load a JSON object from the database using the SQL and the parameter.
+	 * <p>
+	 * If no result matched the query, null will be returned.
+	 * </p>
+	 * @param connection
+	 * @param sql
+	 * @param parameter
+	 * @return
+	 * @throws Exception
+	 */
+	protected JsonObject getObject(Connection connection, String sql, Object parameter) throws Exception
+	{
+		return getObject(connection, sql, new Object[]{parameter});
+	}	
 		
 	/**
 	 * Load a JSON object from the database using the SQL and the parameters.
@@ -197,8 +244,6 @@ public class DatabaseManager
 	{
 		//Fields
 		Connection connection = null;
-		PreparedStatement statement = null;
-		ResultSet result = null;
 		
 		//Try to read data
 		try
@@ -206,6 +251,43 @@ public class DatabaseManager
 			//Get a connection
 			connection = getConnection();
 			
+			//Get the JSON object using the connection
+			return getObject(connection, sql, parameters);
+		}
+		
+		//Failed
+		catch(Exception ex)
+		{
+			throw new Exception("Failed to get JSON object from database result set", ex);
+		}
+		
+		//Clean up
+		finally
+		{
+			try {connection.close();} catch(Throwable t) {}
+		}
+	}
+	
+	/**
+	 * Load a JSON object from the database using the SQL and the parameters.
+	 * <p>
+	 * If no result matched the query null will be returned.
+	 * </p>
+	 * @param connection
+	 * @param sql
+	 * @param parameters
+	 * @return
+	 * @throws Exception
+	 */
+	protected JsonObject getObject(Connection connection, String sql, Object... parameters) throws Exception
+	{
+		//Fields
+		PreparedStatement statement = null;
+		ResultSet result = null;
+		
+		//Try to read data
+		try
+		{			
 			//Create the statement
 			statement = connection.prepareStatement(sql);
 			
@@ -252,9 +334,8 @@ public class DatabaseManager
 		{
 			try {result.close();} catch(Throwable t) {}
 			try {statement.close();} catch(Throwable t) {}
-			try {connection.close();} catch(Throwable t) {}
 		}
-	}
+	}	
 	
 	/**
 	 * Load a JSON array of JSON objects from the database using the SQL.
@@ -268,6 +349,19 @@ public class DatabaseManager
 	}
 	
 	/**
+	 * Load a JSON array of JSON objects from the database using the SQL.
+	 * @param connection
+	 * @param sql
+	 * @return
+	 * @throws Exception
+	 */
+	protected JsonArray getArray(Connection connection, String sql) throws Exception
+	{
+		return getArray(connection, sql, new Object[]{});
+	}
+		
+	
+	/**
 	 * Load a JSON array of JSON objects from the database using SQL and the parameter.
 	 * @param sql
 	 * @param parameter
@@ -277,6 +371,19 @@ public class DatabaseManager
 	protected JsonArray getArray(String sql, List<Object> parameter) throws Exception
 	{						
 		return getArray(sql, parameter.toArray(new Object[parameter.size()]));
+	}
+	
+	/**
+	 * Load a JSON array of JSON objects from the database using SQL and the parameter.
+	 * @param connection
+	 * @param sql
+	 * @param parameter
+	 * @return
+	 * @throws Exception
+	 */
+	protected JsonArray getArray(Connection connection, String sql, List<Object> parameter) throws Exception
+	{						
+		return getArray(connection, sql, parameter.toArray(new Object[parameter.size()]));
 	}		
 	
 	/**
@@ -289,6 +396,19 @@ public class DatabaseManager
 	protected JsonArray getArray(String sql, Object parameter) throws Exception
 	{
 		return getArray(sql, new Object[]{parameter});
+	}
+	
+	/**
+	 * Load a JSON array of JSON objects from the database using SQL and the parameter.
+	 * @param connection
+	 * @param sql
+	 * @param parameter
+	 * @return
+	 * @throws Exception
+	 */
+	protected JsonArray getArray(Connection connection, String sql, Object parameter) throws Exception
+	{
+		return getArray(connection, sql, new Object[]{parameter});
 	}	
 	
 	/**
@@ -302,8 +422,6 @@ public class DatabaseManager
 	{
 		//Fields
 		Connection connection = null;
-		PreparedStatement statement = null;
-		ResultSet result = null;
 		
 		//Try to read data
 		try
@@ -311,6 +429,36 @@ public class DatabaseManager
 			//Get a connection
 			connection = getConnection();
 			
+			//Get the array using the default connection
+			return getArray(connection, sql, parameters);			
+		}
+		
+		//Failed
+		catch(Exception ex)
+		{
+			throw new Exception("Failed to get JSON array from database result set", ex);
+		}
+		
+		//Clean up
+		finally {try {connection.close();} catch(Throwable t) {}}				
+	}
+	
+	/**
+	 * Load a JSON array of JSON objects from the database using the SQL and the parameters.
+	 * @param sql
+	 * @param parameters
+	 * @return
+	 * @throws Exception
+	 */
+	protected JsonArray getArray(Connection connection, String sql, Object... parameters) throws Exception
+	{
+		//Fields
+		PreparedStatement statement = null;
+		ResultSet result = null;
+		
+		//Try to read data
+		try
+		{			
 			//Create the statement
 			statement = connection.prepareStatement(sql);
 			
@@ -351,9 +499,8 @@ public class DatabaseManager
 		{
 			try {result.close();} catch(Throwable t) {}
 			try {statement.close();} catch(Throwable t) {}
-			try {connection.close();} catch(Throwable t) {}
 		}				
-	}
+	}	
 	
 	/**
 	 * Execute the SQL with the parameter.
@@ -365,6 +512,18 @@ public class DatabaseManager
 	{
 		this.execute(sql, new Object[]{parameter});
 	}
+	
+	/**
+	 * Execute the SQL with the parameter.
+	 * @param connection
+	 * @param sql
+	 * @param parameter
+	 * @throws Exception
+	 */
+	protected void execute(Connection connection, String sql, Object parameter) throws Exception
+	{
+		this.execute(connection, sql, new Object[]{parameter});
+	}	
 	
 	/**
 	 * Execute the SQL with the parameters.
