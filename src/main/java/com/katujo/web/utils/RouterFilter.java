@@ -37,7 +37,7 @@ import com.google.gson.JsonPrimitive;
 /**
  * The router filter that routes incoming request to the annotated classes using the package and
  * the method name as the path.
- * @author Johan Hertz
+ * @author Johan Hertz 
  */
 public class RouterFilter implements Filter
 {
