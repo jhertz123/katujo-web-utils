@@ -119,7 +119,7 @@ public class DatabaseCacheManager extends com.katujo.web.utils.DatabaseManager
 	/**
 	 * Create the object.
 	 * @param defaultDataSource
-	 * @param size
+	 * @param size 
 	 * @param clearSize
 	 * @param expiry
 	 */
@@ -141,6 +141,9 @@ public class DatabaseCacheManager extends com.katujo.web.utils.DatabaseManager
 	/**
 	 * Load a JSON array from the cache if not found or expired then load object from 
 	 * the database using the SQL.
+	 * @param sql
+	 * @return
+	 * @throws Exception
 	 */
 	public JsonArray getCacheArray(String sql) throws Exception
 	{
