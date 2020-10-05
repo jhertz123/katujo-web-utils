@@ -64,7 +64,7 @@ public class DatabaseManager
 	 * <p>
 	 * On Tomcat this should be java:comp/env/DATA_SOURCE_NAME
 	 * </p>
-	 * @param name
+	 * @param lookup
 	 * @return
 	 * @throws Exception
 	 */
