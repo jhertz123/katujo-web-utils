@@ -54,7 +54,7 @@ public class RouterFilter implements Filter
 	private static final String JSON_CONTENT_TYPE = "application/json";
 	
 	//The character encoding to use when sending back JSON data
-	private static final String JSON_CHARACTER_ENCODING = "ISO-8859-1";
+	private static final String JSON_CHARACTER_ENCODING = "UTF-8";
 	
 	//The binary array content type
 	private static final String BINARY_CONTENT_TYPE = "application/octet-stream"; 
@@ -367,20 +367,20 @@ public class RouterFilter implements Filter
 	{
 		//Try to send the data
 		try
-		{
+		{				
 			//Don't do anything if the response data is not set
 			if(data == null)
 				;
-				
+									
 			//Send the response back as JSON data
 			else if(data instanceof JsonElement)					
-			{					
+			{									
 				//Set the response type
 				response.setContentType(JSON_CONTENT_TYPE);
 				response.setCharacterEncoding(JSON_CHARACTER_ENCODING);
-																					
+																											
 				//Print the JSON to the output stream
-				response.getOutputStream().print(data.toString());					
+				response.getWriter().print(data.toString());				
 			}
 			
 			//Send the response back as a JSON string primitive
@@ -394,7 +394,7 @@ public class RouterFilter implements Filter
 				JsonPrimitive primitive = new JsonPrimitive((String) data);
 																					
 				//Print the JSON to the output stream
-				response.getOutputStream().print(primitive.toString());				
+				response.getWriter().print(primitive.toString());				
 			}
 						
 			//Send the response back as a JSON number primitive
@@ -408,7 +408,7 @@ public class RouterFilter implements Filter
 				JsonPrimitive primitive = new JsonPrimitive((Number) data);
 																					
 				//Print the JSON to the output stream
-				response.getOutputStream().print(primitive.toString());				
+				response.getWriter().print(primitive.toString());			
 			}		
 			
 			//Send the response back as a JSON number primitive that can be cast as a date
@@ -422,7 +422,7 @@ public class RouterFilter implements Filter
 				JsonPrimitive primitive = new JsonPrimitive(((Date) data).getTime());
 																					
 				//Print the JSON to the output stream
-				response.getOutputStream().print(primitive.toString());					
+				response.getWriter().print(primitive.toString());					
 			}
 			
 			//Send the response back as a JSON boolean primitive
@@ -436,7 +436,7 @@ public class RouterFilter implements Filter
 				JsonPrimitive primitive = new JsonPrimitive((boolean) data);
 																					
 				//Print the JSON to the output stream
-				response.getOutputStream().print(primitive.toString());					
+				response.getWriter().print(primitive.toString());					
 			}			
 			
 			//Send the response back as binary data 
