@@ -19,7 +19,7 @@ import com.google.gson.JsonPrimitive;
 /**
  * JSON util methods that makes it easier to work with GSON/JSON in java.
  * @author Johan Hertz
- *
+ * @author Johanna Sundh
  */
 public class JsonUtils
 {
