@@ -341,7 +341,7 @@ public class RouterFilter implements Filter
 			String message = "Failed to invoke route for path " + path;
 			
 			//Check if masked
-			if(maskOnError.containsKey(path))
+			if(path != null && maskOnError.containsKey(path))
 				message += "\n\tRequest Data: **MASKED**";
 			
 			//Check if request data is set

@@ -552,7 +552,7 @@ public class JsonUtils
 				if(type == null)
 					type = meta.getColumnTypeName(column+1);
 				
-				//Type could not be set (will throw error)
+				//Type can not be set (will throw error)
 				if(type == null)
 					type = "NOT_SET";
 				
@@ -571,7 +571,7 @@ public class JsonUtils
 				else if(java.sql.Timestamp.class.getName().equals(type)) types[column] = DatabaseTypes.TIMESTAMP;
 				else if(java.sql.Time.class.getName().equals(type)) types[column] = DatabaseTypes.TIMESTAMP; //TODO: Implement the time database type
 				else if(java.sql.Date.class.getName().equals(type)) types[column] = DatabaseTypes.DATE;
-				else if(type != null && (type.toUpperCase().endsWith(".CLOB") || type.toUpperCase().endsWith(".ORACLECLOB") || "BINARY".equals(meta.getColumnTypeName(column+1)))) types[column] = DatabaseTypes.STRING;
+				else if(type.toUpperCase().endsWith(".CLOB") || type.toUpperCase().endsWith(".ORACLECLOB") || "BINARY".equals(meta.getColumnTypeName(column+1))) types[column] = DatabaseTypes.STRING;
 				else if(Boolean.class.getName().equals(type)) types[column] = DatabaseTypes.BOOLEAN;
 				else throw new Exception("There is no mapping for type: " + type);												
 			}
