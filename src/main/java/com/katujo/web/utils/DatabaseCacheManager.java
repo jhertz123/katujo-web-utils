@@ -395,13 +395,16 @@ public class DatabaseCacheManager extends com.katujo.web.utils.DatabaseManager
 	 * @return
 	 */
 	private Object getLock(String queryKey)
-	{
-		//Get the lock 
-		Object lock = locks.get(queryKey);
+	{	
+		//Create the lock
+		Object lock = new Object();
 		
-		//Create the lock if not set
-		if(lock == null)
-			this.locks.put(queryKey, lock = new Object());
+		//Add the lock if not already set
+		Object retrieved = locks.putIfAbsent(queryKey, lock);
+		
+		//Set the lock to the retrieved lock if set
+		if(retrieved != null)
+			lock = retrieved;
 		
 		//Return the lock
 		return lock;

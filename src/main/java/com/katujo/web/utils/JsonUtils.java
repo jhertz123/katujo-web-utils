@@ -653,8 +653,8 @@ public class JsonUtils
 			//Set the filed
 			field = builder.toString();
 			
-			//Add the filed to the map
-			createJsonObjectColumnTranslator.put(column, field);				
+			//Add the filed to the map if not already set
+			createJsonObjectColumnTranslator.putIfAbsent(column, field);				
 		}		
 		
 		//Return the filed
