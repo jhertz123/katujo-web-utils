@@ -9,6 +9,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.Timestamp;
 import java.util.Date;
+import java.util.Locale;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.google.gson.JsonArray;
@@ -339,10 +340,14 @@ public class JsonUtils
 		if(getObj == null)
 			return null;	
 		
-		//Check if string
+		//Return string as is
 		if(getObj instanceof String)
 			return (String) getObj;
 		
+		//Format the double as string and return it
+		if(getObj instanceof Double)
+			return String.format(Locale.US, "%f", getObj);		
+				
 		//Return the toString result for the object
 		return getObj.toString();		
 	}
