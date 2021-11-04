@@ -21,7 +21,7 @@ import com.google.gson.JsonParser;
 /**
  * Parse the JSON data sent by the client and makes it available to other filters and servlets
  * via the thread safe getJson method.
- * @author Johan Hertz 
+ * @author Johan Hertz
  */
 public class JsonFilter implements Filter
 {
