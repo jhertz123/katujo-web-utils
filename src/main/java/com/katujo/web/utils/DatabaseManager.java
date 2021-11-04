@@ -64,7 +64,7 @@ public class DatabaseManager
 	 * <p>
 	 * On Tomcat this should be java:comp/env/DATA_SOURCE_NAME
 	 * </p>
-	 * @param name
+	 * @param lookup
 	 * @return
 	 * @throws Exception
 	 */
@@ -468,8 +468,12 @@ public class DatabaseManager
 				//Set the parameters
 				for(int i=0; i<parameters.length; i++)
 				{
+					//Set null parameters
+					if(parameters[i] == null)
+						statement.setString(i+1, null);
+					
 					//Set the timestamp to avoid being shadowed by below date check
-					if(parameters[i] instanceof Timestamp)
+					else if(parameters[i] instanceof Timestamp)
 						statement.setObject(i+1, (Timestamp) parameters[i]);							
 					
 					//Convert to SQL date when using java.util.Date parameter

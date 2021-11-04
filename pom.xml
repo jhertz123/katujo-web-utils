@@ -4,8 +4,8 @@
   	<modelVersion>4.0.0</modelVersion>
   	<groupId>com.katujo</groupId>
   	<artifactId>katujo-web-utils</artifactId>
-  	<packaging>jar</packaging>
-  	<version>0.0.25-SNAPSHOT</version>
+  	<packaging>jar</packaging> 
+  	<version>0.0.26-SNAPSHOT</version>
   	 <!-- 
   	<version>0.0.1</version>
   	 -->

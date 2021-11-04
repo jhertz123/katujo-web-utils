@@ -9,6 +9,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.Timestamp;
 import java.util.Date;
+import java.util.Locale;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.google.gson.JsonArray;
@@ -339,10 +340,14 @@ public class JsonUtils
 		if(getObj == null)
 			return null;	
 		
-		//Check if string
+		//Return string as is
 		if(getObj instanceof String)
 			return (String) getObj;
 		
+		//Format the double as string and return it
+		if(getObj instanceof Double)
+			return String.format(Locale.US, "%f", getObj);		
+				
 		//Return the toString result for the object
 		return getObj.toString();		
 	}
@@ -552,7 +557,7 @@ public class JsonUtils
 				if(type == null)
 					type = meta.getColumnTypeName(column+1);
 				
-				//Type could not be set (will throw error)
+				//Type can not be set (will throw error)
 				if(type == null)
 					type = "NOT_SET";
 				
@@ -571,7 +576,7 @@ public class JsonUtils
 				else if(java.sql.Timestamp.class.getName().equals(type)) types[column] = DatabaseTypes.TIMESTAMP;
 				else if(java.sql.Time.class.getName().equals(type)) types[column] = DatabaseTypes.TIMESTAMP; //TODO: Implement the time database type
 				else if(java.sql.Date.class.getName().equals(type)) types[column] = DatabaseTypes.DATE;
-				else if(type != null && (type.toUpperCase().endsWith(".CLOB") || type.toUpperCase().endsWith(".ORACLECLOB") || "BINARY".equals(meta.getColumnTypeName(column+1)))) types[column] = DatabaseTypes.STRING;
+				else if(type.toUpperCase().endsWith(".CLOB") || type.toUpperCase().endsWith(".ORACLECLOB") || "BINARY".equals(meta.getColumnTypeName(column+1))) types[column] = DatabaseTypes.STRING;
 				else if(Boolean.class.getName().equals(type)) types[column] = DatabaseTypes.BOOLEAN;
 				else throw new Exception("There is no mapping for type: " + type);												
 			}
@@ -653,8 +658,8 @@ public class JsonUtils
 			//Set the filed
 			field = builder.toString();
 			
-			//Add the filed to the map
-			createJsonObjectColumnTranslator.put(column, field);				
+			//Add the filed to the map if not already set
+			createJsonObjectColumnTranslator.putIfAbsent(column, field);				
 		}		
 		
 		//Return the filed
