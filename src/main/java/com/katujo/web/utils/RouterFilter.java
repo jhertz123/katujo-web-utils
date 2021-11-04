@@ -37,7 +37,8 @@ import com.google.gson.JsonPrimitive;
 /**
  * The router filter that routes incoming request to the annotated classes using the package and
  * the method name as the path.
- * @author Johan Hertz 
+ * @author Johan Hertz
+ * @author Johanna Sundh
  */
 public class RouterFilter implements Filter
 {
@@ -75,7 +76,7 @@ public class RouterFilter implements Filter
 	{
 		//Try to init the filter
 		try
-		{			
+		{		
 			//Get the path where to mask request data
 			for(String path : maskRequestDataOnError(config))
 				maskOnError.put(path, NO_PARAMETERS);
@@ -94,11 +95,11 @@ public class RouterFilter implements Filter
 			classes.addAll(classesWebXml);
 			
 			//Get the base package
-			//TODO: Remove legacy scan property
+			//TODO: Remove legacy scan property rename to scan
 			String basePackage = config.getInitParameter("base-package") != null ? config.getInitParameter("base-package") : config.getInitParameter("scan");
 			
-			//Set the default base package to empty string
-			basePackage = basePackage != null ? basePackage : "";  
+			//Set the default base package to empty string array
+			String[] basePackages = basePackage != null ? basePackage.split(";") : new String[0]; 
 										
 			//Get the extension that will be added to the end of every path 
 			String extension = config.getInitParameter("extension");
@@ -115,15 +116,36 @@ public class RouterFilter implements Filter
 				//Get the package name
 				String routePackage = routeClass.getPackage().getName();
 				
-				//Check if the package match the base package
-				if(!routePackage.startsWith(basePackage))
-					continue;
+				//Create the base path
+				String base = routePackage;
+
+				//Set base
+				if(basePackages != null && basePackages.length != 0)
+				{
+					//Found
+					boolean found = false;
+					
+					//Check every base package
+					for(String basePack : basePackages)
+					{
+						//Check if the package match the base package
+						if(routePackage.startsWith(basePack))
+						{
+							//Set base
+							base = routePackage.substring(basePack.length()).replace('.', '/') + "/";
+							
+							//Set found
+							found = true;
+						}						
+					}
+					
+					//Route does not match any of the base packages
+					if(!found)
+						continue;
+				}
 																		
 				//Create an instance of the route
 				Object instance = routeClass.getConstructor(new Class[] {}).newInstance(new Object[]{});
-				
-				//Create the base path 
-				String base = routePackage.substring(basePackage.length()).replace('.', '/') + "/";
 								
 				//Add the controller methods
 				for(Method method : routeClass.getMethods())
@@ -162,7 +184,7 @@ public class RouterFilter implements Filter
 					//Ignore any other method that has parameter
 					else if(method.getParameterTypes().length != 0)
 						continue;
-					
+
 					//Create the path
 					String path = base + method.getName() + extension;
 
@@ -498,17 +520,49 @@ public class RouterFilter implements Filter
 		try
 		{			
 			//Get the URL
-			URL url = WarUrlFinder.findWebInfClassesPath(config.getServletContext());
+			URL urlClasses = WarUrlFinder.findWebInfClassesPath(config.getServletContext());
+			URL[] urlLib = WarUrlFinder.findWebInfLibClasspaths(config.getServletContext());
 			
 			//Could not find the URL
-			if(url == null)
+			if(urlClasses == null)
 				return new HashSet<String>();
+			
+			//Set the libraries to scan
+			String[] libraries = config.getInitParameter("scan-library") != null ? config.getInitParameter("scan-library").split(";") : new String[0];
 			
 			//Create the annotation database
 			AnnotationDB database = new AnnotationDB();
 			
+			//Create empty list for URLs
+			List<URL> list = new ArrayList<URL>();
+			
+			//Add urlClasses
+			list.add(urlClasses);
+
+			//Search library
+			for(URL url : urlLib)
+			{
+				for(String library : libraries)
+				{
+					//Get name of file
+					String name = url.getFile().substring(url.getFile().lastIndexOf("/") +1);
+					
+					//Add to list if name matches library
+					if(library.toLowerCase().equals(name.toLowerCase()))
+						list.add(url);
+				}
+				
+			}
+			
+			//Create array
+			URL[] allUrls = new URL[list.size()];
+			
+			//Fill array
+			for(int i = 0; i < list.size(); i++)
+				allUrls[i] = list.get(i);
+			
 			//Scan the URL
-			database.scanArchives(url);
+			database.scanArchives(allUrls);
 			
 			//Get the classes marked with the controller annotation
 			Set<String> classes = database.getAnnotationIndex().get(com.katujo.web.utils.Route.class.getCanonicalName());
