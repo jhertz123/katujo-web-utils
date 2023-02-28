@@ -29,7 +29,7 @@ public class JsonUtils
 	private static final ConcurrentHashMap<String, String> createJsonObjectColumnTranslator = new ConcurrentHashMap<String, String>();	
 	
 	//Database types used when creating JSON objects and arrays	
-	private static enum DatabaseTypes
+	private static enum DatabaseTypes 
 	{
 		BOOLEAN,
 		DATE,
