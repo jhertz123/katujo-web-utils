@@ -161,7 +161,7 @@ public class DatabaseManager
 	 * @param connection
 	 * @param sql
 	 * @return
-	 * @throws Exception
+	 * @throws Exception 
 	 */
 	protected JsonObject getObject(Connection connection, String sql) throws Exception
 	{
