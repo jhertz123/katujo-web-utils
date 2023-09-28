@@ -165,7 +165,7 @@ public class DatabaseManager
 	 */
 	protected JsonObject getObject(Connection connection, String sql) throws Exception
 	{
-		return getObject(sql, new Object[]{});				 
+		return getObject(connection, sql, new Object[]{});				 
 	}	
 	
 	/**
